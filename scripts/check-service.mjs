@@ -4,6 +4,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 await mkdir('artifacts', { recursive: true });
 const origin = 'https://localhost';
 const report = { checkedAt: new Date().toISOString(), origin, available: false, corsCompatible: false };
+report.androidTransport = 'CapacitorHttp, limitado al endpoint de lugares existente';
 try {
   const response = await fetch('https://viajafacil-conexion.fairflute64.chatgpt.site/api/geo?mode=city&text=Madrid%2C%20Espa%C3%B1a', {
     headers: { Origin: origin }, signal: AbortSignal.timeout(20000)
@@ -17,4 +18,5 @@ try {
 } catch (error) { report.error = error.message; }
 await writeFile('artifacts/service-check.json', JSON.stringify(report, null, 2));
 console.log(JSON.stringify(report));
-if (!report.available || !report.corsCompatible) console.log('::warning::El servicio externo necesita revisión antes de certificar la búsqueda de lugares en Android.');
+if (!report.available) console.log('::warning::El servicio externo no ha superado la comprobación de disponibilidad.');
+if (!report.corsCompatible) console.log('El servidor no admite fetch desde https://localhost; Android usa CapacitorHttp para esta consulta.');

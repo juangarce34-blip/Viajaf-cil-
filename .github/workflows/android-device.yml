@@ -2,10 +2,13 @@ name: Android en emulador
 on:
   push:
     branches: [codex/auditoria-android-2026-10-15]
-    paths: ['android/**', 'native/**', 'capacitor.config.json', '.github/workflows/android-device.yml']
+    paths: ['android/**', 'native/**', 'index.html', 'backup.js', 'geo-planner.js', 'package*.json', 'capacitor.config.json', '.github/workflows/android-device.yml']
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: emulator-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   smoke:
     runs-on: ubuntu-latest
@@ -23,6 +26,8 @@ jobs:
         with:
           packages: platform-tools
           log-accepted-android-sdk-licenses: false
+      - name: Resolver lockfile de la actualización de seguridad
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
       - run: npm ci --no-audit --no-fund
       - run: npm run android:sync
       - name: Activar aceleración del emulador
@@ -40,7 +45,7 @@ jobs:
           script: |
             adb shell svc wifi disable
             adb shell svc data disable
-            cd android && bash gradlew --no-daemon connectedDebugAndroidTest
+            cd android && bash gradlew --no-daemon :app:connectedDebugAndroidTest
       - uses: actions/upload-artifact@v4
         if: always()
         with:

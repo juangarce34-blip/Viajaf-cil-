@@ -26,6 +26,12 @@ jobs:
         with:
           packages: platform-tools
           log-accepted-android-sdk-licenses: false
+      - name: Resolver lockfile de la actualización de seguridad
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dependency-lockfile
+          path: package-lock.json
       - name: Instalar dependencias fijadas
         run: npm ci --no-audit --no-fund
       - name: Pruebas de datos y sintaxis
@@ -33,7 +39,7 @@ jobs:
       - name: Auditoría de dependencias de ejecución
         run: |
           mkdir -p artifacts
-          npm audit --omit=dev --json > artifacts/npm-audit.json || true
+          npm audit --omit=dev --audit-level=high --json > artifacts/npm-audit.json
       - name: Navegador de pruebas
         run: npx playwright install --with-deps chromium
       - name: Comprobar servicio existente desde el origen Android

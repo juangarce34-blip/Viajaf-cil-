@@ -40,6 +40,14 @@ La captura sin imágenes remotas mostró pérdida de contraste en el encabezado 
 
 La ampliación de regresión para propuestas geográficas detectó que `.btn { display:block }` anulaba el atributo HTML `hidden` del botón de aceptar propuesta. Se corrige globalmente el respeto de `[hidden]` y se espera explícitamente a la respuesta asíncrona en la prueba. No se modifica el algoritmo de propuestas.
 
+Se refuerza la exportación nativa de copias grandes: el contenido pasa a caché privada temporal y las opciones de la llamada solo guardan el nombre del archivo, evitando introducir hasta 5 MB en el Bundle de estado de Android. Se confirma éxito después de cerrar el archivo destino, se limpia la caché al guardar/cancelar y se añade prueba de apertura/cancelación con 2 MB y límite del Bundle.
+
+Ejecución `38820427338` (commit `f3913fb`): once pruebas de datos, seis grupos de navegador y Gradle correctos. La consulta real al backend devuelve 200 con resultados válidos, pero no admite CORS desde `https://localhost`. Se adapta únicamente esa consulta al cliente `CapacitorHttp` incluido, con destino restringido y cancelación; la PWA mantiene su transporte.
+
+El informe npm de esa ejecución detecta el aviso crítico [GHSA-rvm3-566m-v7fv](https://github.com/advisories/GHSA-rvm3-566m-v7fv) en `@capacitor/android <7.6.9`. Se actualizan Android, core y CLI a 7.6.9 antes de entregar. Los APK anteriores son evidencia de compilación, **no deben usarse como versión de entrega**. La auditoría de dependencias de ejecución bloqueará futuras compilaciones con avisos altos/críticos.
+
+La prueba de aplicación en emulador API 35 del commit `c53a70a` pasó: 1 prueba, 0 fallos/errores. El job agregado falló después en las pruebas de ejemplo del módulo Cordova generado por clases Kotlin duplicadas; se acota la orden a `:app:connectedDebugAndroidTest`, que comprueba la aplicación real.
+
 ## Pendientes y esfuerzo
 
 Estimación inicial total: 6–10 jornadas de integración y calidad, condicionada al funcionamiento del servicio externo y al entorno de compilación. La entrega de prueba requiere CI correcto y validación en Android. La preparación de publicación añade firma privada, documentación de Play y validación final; el tiempo de revisión de Google no está incluido.

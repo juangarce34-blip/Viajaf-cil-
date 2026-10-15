@@ -1,6 +1,6 @@
 # Android de ViajaFácil
 
-Se conserva la PWA RC16 y su almacenamiento por viajes. Capacitor 7.4.3 incluye sus archivos en el APK, con origen estable `https://localhost`. No hay anuncios, compras, registro obligatorio ni servicios nuevos de pago. Identificador inicial: `com.viajafacil.app`; confirmar su disponibilidad antes de una publicación.
+Se conserva la PWA RC16 y su almacenamiento por viajes. Capacitor 7.6.9 incluye sus archivos en el APK, con origen estable `https://localhost`. No hay anuncios, compras, registro obligatorio ni servicios nuevos de pago. Identificador inicial: `com.viajafacil.app`; confirmar su disponibilidad antes de una publicación.
 
 ## Compilar
 
@@ -27,6 +27,7 @@ El workflow **Android de prueba** compila en la rama independiente, conserva los
 
 - El APK usa los mismos formatos de viaje y copia JSON v1 que la web.
 - Exportar en Android abre `ACTION_CREATE_DOCUMENT`; no solicita permiso general de archivos ni deja una copia temporal pública.
+- Las exportaciones pendientes usan caché privada para evitar el límite de tamaño del estado de Android. Se eliminan al guardar/cancelar; los restos abandonados se limpian después de un día al volver a cargar el componente.
 - Importar conserva el selector de archivos de Capacitor/WebView, con validación y confirmación antes de sustituir viajes.
 - La PWA y el APK tienen almacenes distintos. Para migrar: exportar en la web, guardar el JSON e importarlo en Android.
 - No borrar datos de la aplicación ni desinstalarla sin exportar. El backup automático de Android está desactivado; no hay sincronización en la nube.
@@ -40,6 +41,8 @@ El workflow **Android de prueba** compila en la rama independiente, conserva los
 Atrás recorre las secciones abiertas, permite cancelar un formulario de actividad y minimiza desde Inicio. El paso a segundo plano intenta guardar el viaje. Los enlaces HTTPS se abren en el navegador externo. No se habilita tráfico HTTP ni contenido mixto. El único permiso funcional declarado es Internet; AndroidX añade un permiso interno de firma para sus receptores, sin solicitud al usuario.
 
 Se habilita `adjustMarginsForEdgeToEdge: auto` para que las barras del sistema no tapen los controles en Android 15/16. El workflow **Android en emulador** instala en API 35, desactiva Wi-Fi/datos y comprueba arranque local, puente nativo, origen y persistencia al recargar. No sustituye la prueba manual del selector de archivos ni la prueba en dispositivo físico. El informe `service-check.json` registra una consulta real al servicio existente y su compatibilidad CORS con el origen Android; un aviso no se interpreta como servicio verificado.
+
+El servicio de lugares responde pero no admite CORS para `https://localhost`. Android usa el cliente HTTP nativo incluido en Capacitor exclusivamente para ese endpoint HTTPS, con timeout y cancelación; la PWA conserva `fetch`. No se añade otro proveedor, clave en el navegador ni servidor de pago.
 
 ## Antes de entregar una versión de distribución
 
