@@ -35,6 +35,14 @@ Ejemplo de cálculo, no precios de Los Ángeles: 3 personas × 3 días × (2 com
 
 ## Validación
 
-Seis pruebas unitarias nuevas comprueban consultas acotadas, normalización, enlaces, costes desconocidos, redondeo, preservación de actividades, duplicados y restricción del cliente HTTP nativo. La regresión de navegador añade búsqueda, filtro, guardado de local sin borrar visitas, copia del cálculo y persistencia. `scripts/check-dining.mjs` realiza una consulta real de prueba en el centro de Los Ángeles; su informe distingue disponibilidad real de los resultados simulados de las pruebas.
+Siete pruebas unitarias nuevas comprueban consultas acotadas, normalización, enlaces, costes desconocidos, redondeo, preservación de actividades, duplicados y restricción del cliente HTTP nativo. La regresión de navegador añade búsqueda, filtro, guardado de local sin borrar visitas, copia del cálculo y persistencia. `scripts/check-dining.mjs` realiza una consulta real de prueba en el centro de Los Ángeles; su informe distingue disponibilidad real de los resultados simulados de las pruebas.
 
 El APK sigue siendo debug: puede requerir desinstalar la versión anterior por cambio de clave automática de CI. Exportar los viajes antes de desinstalar e importar la copia después. El AAB permanece sin firma de distribución. No se publica automáticamente ni se modifica main.
+
+## Resultado de entrega
+
+Código verificado: `b5ecbc91aca4b2c5868eea98f295d5327a371222`. Versión Android 0.18.0, versionCode 2. Pasan 22 pruebas Node, 8 grupos Chromium y 2 pruebas en Android 15; Gradle y firma debug correctos; lint 0 errores/14 avisos; npm de ejecución 0 vulnerabilidades registradas.
+
+[Compilación](https://github.com/juangarce34-blip/Viajaf-cil-/actions/runs/38824572633) · [Emulador](https://github.com/juangarce34-blip/Viajaf-cil-/actions/runs/38824572488). SHA-256 del APK descargado: `ec3e2970cb8469ce4708d038c9153686b881015760edb9bd7b8815805ae73857`.
+
+**Limitación confirmada:** el informe `dining-live.json` de esta ejecución registra HTTP 500. La prueba de disponibilidad externa es informativa y no se oculta: la consulta dinámica de locales no está certificada en esta entrega. Sí están comprobadas la selección guardada de cuatro locales de Los Ángeles con sus fuentes oficiales, las búsquedas externas y la calculadora. No se presenta una respuesta simulada como prueba de datos reales.
