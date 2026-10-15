@@ -26,12 +26,6 @@ jobs:
         with:
           packages: platform-tools
           log-accepted-android-sdk-licenses: false
-      - name: Resolver lockfile de la actualización de seguridad
-        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
-      - uses: actions/upload-artifact@v4
-        with:
-          name: dependency-lockfile
-          path: package-lock.json
       - name: Instalar dependencias fijadas
         run: npm ci --no-audit --no-fund
       - name: Pruebas de datos y sintaxis

@@ -26,8 +26,6 @@ jobs:
         with:
           packages: platform-tools
           log-accepted-android-sdk-licenses: false
-      - name: Resolver lockfile de la actualización de seguridad
-        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
       - run: npm ci --no-audit --no-fund
       - run: npm run android:sync
       - name: Activar aceleración del emulador
