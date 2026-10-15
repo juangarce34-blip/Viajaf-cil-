@@ -7,7 +7,7 @@ Se conserva la PWA RC16 y su almacenamiento por viajes. Capacitor 7.4.3 incluye 
 Requisitos: Node 22, Java 21, Android SDK 36 y build-tools 36.0.0. Gradle 8.13 y Android Gradle Plugin 8.13.2 están fijados en el proyecto.
 
 ```sh
-npm install
+npm ci
 npm test
 npx playwright install chromium
 npm run test:browser
@@ -16,7 +16,7 @@ cd android
 ./gradlew assembleDebug testDebugUnitTest lintDebug bundleRelease
 ```
 
-El primer trabajo de CI genera `package-lock.json` como artefacto. Incorporarlo a la rama tras verificar la instalación y usar `npm ci` en las siguientes compilaciones. No se incluye `node_modules` ni la configuración local del SDK.
+`package-lock.json` se recuperó de la primera compilación correcta y se incorpora a la rama. CI usa `npm ci` para respetar también las versiones transitivas. No se incluye `node_modules` ni la configuración local del SDK.
 
 APK: `android/app/build/outputs/apk/debug/app-debug.apk`.
 AAB: `android/app/build/outputs/bundle/release/app-release.aab`.
@@ -37,7 +37,9 @@ El workflow **Android de prueba** compila en la rama independiente, conserva los
 
 ## Comportamiento Android
 
-Atrás recorre las secciones abiertas, permite cancelar un formulario de actividad y minimiza desde Inicio. El paso a segundo plano intenta guardar el viaje. Los enlaces HTTPS se abren en el navegador externo. No se habilita tráfico HTTP ni contenido mixto. El único permiso declarado es Internet.
+Atrás recorre las secciones abiertas, permite cancelar un formulario de actividad y minimiza desde Inicio. El paso a segundo plano intenta guardar el viaje. Los enlaces HTTPS se abren en el navegador externo. No se habilita tráfico HTTP ni contenido mixto. El único permiso funcional declarado es Internet; AndroidX añade un permiso interno de firma para sus receptores, sin solicitud al usuario.
+
+Se habilita `adjustMarginsForEdgeToEdge: auto` para que las barras del sistema no tapen los controles en Android 15/16. El workflow **Android en emulador** instala en API 35, desactiva Wi-Fi/datos y comprueba arranque local, puente nativo, origen y persistencia al recargar. No sustituye la prueba manual del selector de archivos ni la prueba en dispositivo físico. El informe `service-check.json` registra una consulta real al servicio existente y su compatibilidad CORS con el origen Android; un aviso no se interpreta como servicio verificado.
 
 ## Antes de entregar una versión de distribución
 

@@ -41,6 +41,7 @@ public class TravelFilesPlugin extends Plugin {
             return;
         }
         Uri uri = result.getData().getData();
+        if (!"content".equals(uri.getScheme())) { call.reject("La ubicación elegida no es un documento compatible."); return; }
         String data = call.getString("data");
         if (data == null) { call.reject("La copia ya no está disponible. Vuelve a exportarla."); return; }
         getBridge().execute(() -> {

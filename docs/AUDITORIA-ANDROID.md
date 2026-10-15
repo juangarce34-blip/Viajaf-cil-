@@ -32,6 +32,12 @@ Las comprobaciones locales de sintaxis y las pruebas Node pasan. La ejecución d
 
 Primera ejecución CI (`38819529596`): falló en la instalación predeterminada del paquete obsoleto `tools` de setup-android. Se corrigió solicitando únicamente `platform-tools`. Once pruebas locales cubren además confirmación, cancelación y recuperación de datos tras fallo de almacenamiento durante la restauración.
 
+Segunda ejecución CI (`38819669068`, commit `086d940`): correcta. Once pruebas Node, cinco grupos de regresión en Chromium y compilación Gradle (`assembleDebug`, `testDebugUnitTest`, `lintDebug`, `bundleRelease`) completadas. APK `com.viajafacil.app`, versión 0.17.0, mínimo API 23 y objetivo API 36; firma debug verificada con esquemas v1/v2. SHA-256 del primer APK: `93fdddb98311d3793055bfc44f4a7ed885c6c2c7d99ba170127aac336ebda080`. El artefacto incluye AAB sin firma y lockfile recuperado para fijar dependencias.
+
+Lint inicial: 0 errores y 16 advertencias. Se corrige orden del manifiesto y se añaden exclusiones explícitas de copia/transferencia para Android 12+. Quedan advertencias de versiones más recientes, recursos de plantilla y diseño de iconos; no se ocultan los informes. El análisis detecta además un permiso interno de firma de AndroidX, sin acceso adicional solicitado al usuario.
+
+La captura sin imágenes remotas mostró pérdida de contraste en el encabezado principal. Se añade un color de fondo de reserva sin cambiar el diseño conectado. Se incorpora ajuste de márgenes para barras del sistema y prueba de instalación/arranque sin red en emulador; sus resultados se registrarán al completarse.
+
 ## Pendientes y esfuerzo
 
 Estimación inicial total: 6–10 jornadas de integración y calidad, condicionada al funcionamiento del servicio externo y al entorno de compilación. La entrega de prueba requiere CI correcto y validación en Android. La preparación de publicación añade firma privada, documentación de Play y validación final; el tiempo de revisión de Google no está incluido.

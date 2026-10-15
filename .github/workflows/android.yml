@@ -27,13 +27,15 @@ jobs:
           packages: platform-tools
           log-accepted-android-sdk-licenses: false
       - name: Instalar dependencias fijadas
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
       - name: Pruebas de datos y sintaxis
         run: npm test
       - name: Navegador de pruebas
         run: npx playwright install --with-deps chromium
       - name: Regresión de funciones existentes
         run: npm run test:browser
+      - name: Comprobar servicio existente desde el origen Android
+        run: node scripts/check-service.mjs
       - name: Preparar aplicación Android
         run: npm run android:sync
       - name: SDK Android

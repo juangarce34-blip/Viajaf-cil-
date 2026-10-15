@@ -85,6 +85,22 @@ const path = require('node:path');
     await page.waitForFunction(() => document.getElementById('geoStatus').textContent.includes('Servicio no disponible'));
     assert.equal(await page.locator('#geoSearch').isEnabled(), true);
     results.push('Error de servicio de lugares: mensaje visible y controles recuperados');
+    await page.unroute('https://viajafacil-conexion.fairflute64.chatgpt.site/api/geo**');
+    await page.route('https://viajafacil-conexion.fairflute64.chatgpt.site/api/geo**', route => {
+      const city = new URL(route.request().url()).searchParams.get('mode') === 'city';
+      return route.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' },
+        body: JSON.stringify(city ? { results: [{ lat: 40.4168, lon: -3.7038, city: 'Madrid', country: 'España', formatted: 'Madrid, España' }] } :
+          { features: [{ properties: { name: 'Plaza de prueba', lat: 40.4169, lon: -3.7039, place_id: 'test-place', formatted: 'Centro de Madrid' } }] }) });
+    });
+    await page.click('#geoSearch');
+    await page.click('#geoCities button'); await page.click('#geoGenerate');
+    await page.waitForSelector('#geoAccept', { state: 'visible' });
+    assert.match(await page.locator('#geoPreview').textContent(), /Plaza de prueba/);
+    assert.equal(await page.evaluate(() => document.getElementById('tripDestination').value), 'Londres');
+    page.once('dialog', d => d.accept()); await page.click('#geoAccept');
+    assert.match(await page.locator('#dpList').textContent(), /Plaza de prueba/);
+    assert.equal(await page.evaluate(() => document.getElementById('tripDestination').value), 'Madrid');
+    results.push('Propuestas de lugares con respuesta simulada: previsualizar y guardar únicamente tras confirmar');
     await page.evaluate(() => show('home'));
     await page.screenshot({ path: 'artifacts/inicio-390.png', fullPage: true });
     assert.deepEqual(errors, []);

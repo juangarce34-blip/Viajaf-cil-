@@ -3,5 +3,5 @@
   "appName": "ViajaFácil",
   "webDir": "dist",
   "server": { "hostname": "localhost", "androidScheme": "https", "cleartext": false },
-  "android": { "allowMixedContent": false, "backgroundColor": "#087f91" }
+  "android": { "allowMixedContent": false, "backgroundColor": "#087f91", "adjustMarginsForEdgeToEdge": "auto" }
 }
