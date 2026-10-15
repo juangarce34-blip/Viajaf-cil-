@@ -1,0 +1,23 @@
+name: Comprobar gastronomía existente
+on:
+  push:
+    branches: [codex/auditoria-android-2026-10-15]
+    paths: [.github/workflows/food-probe.yml]
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Consultar categorías de comida en Los Ángeles
+        run: |
+          node --input-type=module <<'JS'
+          const base='https://viajafacil-conexion.fairflute64.chatgpt.site/api/geo';
+          for(const categories of ['catering.restaurant','catering.cafe','catering.bar,catering.pub']){
+            const url=new URL(base);
+            for(const [k,v] of Object.entries({mode:'places',lon:-118.2437,lat:34.0522,radius:5000,categories}))url.searchParams.set(k,v);
+            const r=await fetch(url,{signal:AbortSignal.timeout(20000)});
+            const d=await r.json();
+            console.log(JSON.stringify({categories,status:r.status,error:d.error,count:d.features?.length,sample:d.features?.slice(0,1).map(f=>({name:f.properties?.name,categories:f.properties?.categories,fields:Object.keys(f.properties||{})}))}));
+          }
+          JS
