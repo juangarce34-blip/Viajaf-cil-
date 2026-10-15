@@ -2,6 +2,28 @@
 
 Base: `juangarce34-blip/Viajaf-cil-`, main `b4c713c4d52c829e6d9fef5029eef03e8e8e3896`. Rama de trabajo: `codex/auditoria-android-2026-10-15`.
 
+## Resultado de entrega de prueba
+
+Código verificado: `7cffc964bf84dea66746a891a04b93980025258c`. Android integrado sobre la aplicación existente; APK de prueba generado y AAB sin firma de distribución. Sin publicación, merge en main, anuncios, pagos ni implementación de wallet.
+
+| Comprobación final | Resultado |
+| --- | --- |
+| Node: datos, restauración y adaptador HTTP | 15 pruebas correctas |
+| Chromium: regresión de funciones existentes | 6 grupos correctos, sin errores JavaScript |
+| Android 15/API 35 en emulador | 2 pruebas correctas: arranque sin conexión/persistencia y selector/cancelación de copia de 2 MB con Bundle acotado |
+| Gradle | APK, pruebas unitarias Android, lint y AAB correctos |
+| Lint | 0 errores, 14 advertencias no bloqueantes; informes conservados |
+| Auditoría npm de dependencias de ejecución | 0 vulnerabilidades registradas |
+| Backend existente | Respuesta 200 y ciudades válidas; CORS no admite localhost, consulta Android adaptada a CapacitorHttp |
+| Firma del APK | Debug válida, verificada con apksigner |
+| SHA-256 del APK descargado | `61c0037331578ede422dd17adaa4f319ae4ad242dc097b4c1f17e51b48e501d5` |
+
+[Compilación y artefactos](https://github.com/juangarce34-blip/Viajaf-cil-/actions/runs/38821245807) · [Pruebas en emulador](https://github.com/juangarce34-blip/Viajaf-cil-/actions/runs/38821245770).
+
+La auditoría npm cubre dependencias de ejecución, no garantiza ausencia de vulnerabilidades desconocidas. Las advertencias de lint corresponden a versiones disponibles, recursos de plantilla y forma/duplicación de iconos. No hay errores de lint ocultados.
+
+Pendiente antes de distribución: validación en móvil físico, guardado real del documento con distintos proveedores del selector, apertura de enlaces, búsqueda real desde el APK y teclado/rotación/accesibilidad. La conexión nativa tiene pruebas de adaptador y el backend una consulta real; no se ha certificado todavía el flujo completo de búsqueda en un móvil. Para Play faltan clave privada de subida, firma del AAB, ficha/política de privacidad y validación final. Los artefactos de CI caducan a los 30 días.
+
 ## Estado inicial
 
 Se inspeccionaron los seis archivos del árbol completo de main: `index.html` (interfaz, estilos y cuatro scripts internos), `geo-planner.js`, `manifest.webmanifest`, `sw.js` y dos PNG. No había AGENTS.md, README, gestor de dependencias, tests, proyecto Android, firma o configuración APK/AAB. PWA en HTML/CSS/JavaScript, almacenamiento local y servicios externos; sin framework ni backend propio incluido. El último despliegue GitHub Pages estaba correcto; no equivale a pruebas funcionales o compilación Android.

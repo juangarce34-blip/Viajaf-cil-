@@ -16,10 +16,12 @@ cd android
 ./gradlew assembleDebug testDebugUnitTest lintDebug bundleRelease
 ```
 
-`package-lock.json` se recuperó de la primera compilación correcta y se incorpora a la rama. CI usa `npm ci` para respetar también las versiones transitivas. No se incluye `node_modules` ni la configuración local del SDK.
+`package-lock.json` se recuperó de CI y se actualizó a Capacitor 7.6.9 tras corregir el aviso de seguridad documentado en la auditoría. CI usa `npm ci` para respetar también las versiones transitivas. No se incluye `node_modules` ni la configuración local del SDK.
 
 APK: `android/app/build/outputs/apk/debug/app-debug.apk`.
 AAB: `android/app/build/outputs/bundle/release/app-release.aab`.
+
+Pruebas en dispositivo/emulador conectado: `./gradlew :app:connectedDebugAndroidTest`. La ejecución API 35 de entrega pasó las dos pruebas de arranque/persistencia y apertura/cancelación de copia grande; consultar la auditoría para los enlaces a informes. Los dispositivos antiguos necesitan Android System WebView actualizado para las API web modernas que ya utiliza la PWA.
 
 El workflow **Android de prueba** compila en la rama independiente, conserva los informes y el APK durante 30 días y no publica en Google Play ni despliega GitHub Pages. El AAB de esta fase es **sin firma de distribución**. No se debe subir todavía a Google Play. La firma debug automática de CI puede cambiar entre ejecuciones; para actualizar una instalación debug existente puede ser necesario desinstalarla. Exportar antes los viajes para no perderlos.
 
