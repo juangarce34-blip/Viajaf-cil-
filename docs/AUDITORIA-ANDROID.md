@@ -30,6 +30,8 @@ La terminal no pudo conectar con el proxy configurado (`EPERM`/conexión a puert
 
 Las comprobaciones locales de sintaxis y las pruebas Node pasan. La ejecución de Chromium y el servidor de pruebas están bloqueados por las restricciones de sockets del entorno. El resultado de navegador, Gradle y lint debe comprobarse en el trabajo de CI y registrarse por commit. No se declara validación en dispositivo físico ni APK disponible hasta disponer del artefacto real.
 
+Primera ejecución CI (`38819529596`): falló en la instalación predeterminada del paquete obsoleto `tools` de setup-android. Se corrigió solicitando únicamente `platform-tools`. Once pruebas locales cubren además confirmación, cancelación y recuperación de datos tras fallo de almacenamiento durante la restauración.
+
 ## Pendientes y esfuerzo
 
 Estimación inicial total: 6–10 jornadas de integración y calidad, condicionada al funcionamiento del servicio externo y al entorno de compilación. La entrega de prueba requiere CI correcto y validación en Android. La preparación de publicación añade firma privada, documentación de Play y validación final; el tiempo de revisión de Google no está incluido.
