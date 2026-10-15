@@ -95,6 +95,7 @@ const path = require('node:path');
     await page.click('#geoSearch');
     await page.click('#geoCities button'); await page.click('#geoGenerate');
     await page.waitForSelector('#geoAccept', { state: 'visible' });
+    await page.waitForFunction(() => document.getElementById('geoPreview').textContent.includes('Plaza de prueba'));
     assert.match(await page.locator('#geoPreview').textContent(), /Plaza de prueba/);
     assert.equal(await page.evaluate(() => document.getElementById('tripDestination').value), 'Londres');
     page.once('dialog', d => d.accept()); await page.click('#geoAccept');

@@ -38,6 +38,8 @@ Lint inicial: 0 errores y 16 advertencias. Se corrige orden del manifiesto y se 
 
 La captura sin imágenes remotas mostró pérdida de contraste en el encabezado principal. Se añade un color de fondo de reserva sin cambiar el diseño conectado. Se incorpora ajuste de márgenes para barras del sistema y prueba de instalación/arranque sin red en emulador; sus resultados se registrarán al completarse.
 
+La ampliación de regresión para propuestas geográficas detectó que `.btn { display:block }` anulaba el atributo HTML `hidden` del botón de aceptar propuesta. Se corrige globalmente el respeto de `[hidden]` y se espera explícitamente a la respuesta asíncrona en la prueba. No se modifica el algoritmo de propuestas.
+
 ## Pendientes y esfuerzo
 
 Estimación inicial total: 6–10 jornadas de integración y calidad, condicionada al funcionamiento del servicio externo y al entorno de compilación. La entrega de prueba requiere CI correcto y validación en Android. La preparación de publicación añade firma privada, documentación de Play y validación final; el tiempo de revisión de Google no está incluido.
