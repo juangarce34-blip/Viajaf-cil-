@@ -60,3 +60,32 @@ El servicio de lugares responde pero no admite CORS para `https://localhost`. An
 ## Wallet: evaluación, sin implementación
 
 Viable como módulo local de PDF/imágenes asociado a cada viaje. Requiere almacenamiento privado, acceso sin conexión, cifrado y política de claves, límites de tamaño, borrado, selección explícita al compartir y un formato de copia propio (no `localStorage`). Un lector de códigos puede evaluarse después. No implica integración con Google Wallet, sincronización ni compras. Estimación inicial: 5–8 jornadas adicionales más validación de documentos. Pendiente de autorización.
+
+## Incidente de instalación 0.17 → 0.18: firma diferente
+
+Se verificaron ambos APK con `keytool -printcert -jarfile`. Los certificados SHA-256 son:
+
+- 0.17: `C06C7D529C349E96EED7F2B7447755433C20BC68D8E3461F10D5D6EE48B86A83`.
+- 0.18: `BC0775336DCD4F7CC1AA3351164A0E5FC4FFD8A0352427BA626E09D9B94A6AA5`.
+
+La causa es la clave debug efímera generada en cada runner. Android rechaza actualizar el mismo paquete con un certificado distinto. Las claves anteriores no se conservaron: no se puede fabricar una actualización compatible a partir de sus certificados públicos.
+
+Migración: exportar todos los viajes desde la instalación anterior, comprobar que el JSON está guardado fuera de la aplicación, desinstalar, instalar e importar. No desinstalar ni borrar datos antes de tener la copia. La primera instalación firmada con la futura clave fija también requiere esta migración si sustituye una versión debug.
+
+Corrección: el workflow conserva las compilaciones debug para comprobaciones internas pero deja de incluir sus APK en los artefactos descargables. `ViajaFacil-Android-informes` contiene informes y el AAB; no es un instalador. Solo se genera `ViajaFacil-Android-firma-fija` cuando están configurados los cinco secretos siguientes. Una configuración parcial, un certificado diferente o una firma inválida bloquean la entrega.
+
+### Activación pendiente por el propietario
+
+En GitHub → Settings → Secrets and variables → Actions, configurar:
+
+- `VF_SIGNING_KEYSTORE_BASE64`: almacén privado JKS/PKCS12 codificado en base64 en una sola línea.
+- `VF_SIGNING_STORE_PASSWORD`: contraseña del almacén.
+- `VF_SIGNING_ALIAS`: alias de la clave privada.
+- `VF_SIGNING_KEY_PASSWORD`: contraseña de esa clave.
+- `VF_SIGNING_CERT_SHA256`: huella SHA-256 del certificado, obtenida por `keytool -list -v` (admite dos puntos).
+
+Si ya existe una clave oficial de la app, usarla; no generar otra sin comprobarlo. Si no existe, el propietario debe crear una clave duradera, guardar una copia y sus contraseñas en un almacén privado y configurar estos secretos. No enviarlos por chat ni guardarlos en Git, informes o artefactos. Esta conexión de GitHub no permite escribir secretos, por lo que la activación no se ha realizado.
+
+Una vez configurados, volver a ejecutar **Android de prueba** sobre esta rama. El script reconstruye `release`, verifica certificado y APK, y entrega APK y AAB firmados sin publicar. En cada actualización, aumentar `versionCode` en `android/app/build.gradle`, conservar el identificador y la misma clave. Las claves se restauran solo en un directorio temporal con permisos privados y se eliminan al terminar. El AAB firmado queda preparado para revisión, sin subir a Google Play. Play App Signing requiere decidir la política de clave de subida y certificado de distribución antes de publicar.
+
+Pendiente de validación: compilar con los secretos reales y probar una actualización firmada sobre otra con la misma clave conservando los viajes. La configuración preparada no certifica todavía esa actualización.

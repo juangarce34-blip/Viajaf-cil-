@@ -55,17 +55,30 @@ jobs:
           "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose android/app/build/outputs/apk/debug/app-debug.apk
           sha256sum android/app/build/outputs/apk/debug/app-debug.apk > APK-SHA256.txt
           "$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging android/app/build/outputs/apk/debug/app-debug.apk > APK-METADATA.txt
+      - name: APK de distribución con firma persistente
+        env:
+          VF_SIGNING_KEYSTORE_BASE64: ${{ secrets.VF_SIGNING_KEYSTORE_BASE64 }}
+          VF_SIGNING_STORE_PASSWORD: ${{ secrets.VF_SIGNING_STORE_PASSWORD }}
+          VF_SIGNING_ALIAS: ${{ secrets.VF_SIGNING_ALIAS }}
+          VF_SIGNING_KEY_PASSWORD: ${{ secrets.VF_SIGNING_KEY_PASSWORD }}
+          VF_SIGNING_CERT_SHA256: ${{ secrets.VF_SIGNING_CERT_SHA256 }}
+        run: bash scripts/sign-android.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ViajaFacil-Android-firma-fija
+          if-no-files-found: ignore
+          retention-days: 30
+          path: artifacts/distribucion/
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: ViajaFacil-Android-prueba
+          name: ViajaFacil-Android-informes
           if-no-files-found: warn
           retention-days: 30
           path: |
-            android/app/build/outputs/apk/debug/app-debug.apk
             android/app/build/outputs/bundle/release/app-release.aab
             android/app/build/reports/
-            artifacts/
+            artifacts/*.json
             APK-SHA256.txt
             APK-METADATA.txt
             package-lock.json
