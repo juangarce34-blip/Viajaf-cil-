@@ -102,6 +102,25 @@ const path = require('node:path');
     assert.match(await page.locator('#dpList').textContent(), /Plaza de prueba/);
     assert.equal(await page.evaluate(() => document.getElementById('tripDestination').value), 'Madrid');
     results.push('Propuestas de lugares con respuesta simulada: previsualizar y guardar únicamente tras confirmar');
+    await page.route('https://overpass.private.coffee/api/interpreter**',route=>route.fulfill({status:200,contentType:'application/json',headers:{'access-control-allow-origin':'*'},body:JSON.stringify({elements:[
+      {type:'node',id:101,lat:40.4169,lon:-3.7038,tags:{name:'Restaurante de prueba',amenity:'restaurant'}},
+      {type:'node',id:102,lat:40.4168,lon:-3.7039,tags:{name:'Café de prueba',amenity:'cafe'}}]})}));
+    await page.evaluate(()=>show('dining'));await page.click('#foodCitySearch');await page.click('#foodCities button');await page.click('#foodSearch');
+    await page.waitForFunction(()=>document.getElementById('foodResults').textContent.includes('Restaurante de prueba'));
+    await page.selectOption('#foodType','cafe');assert.doesNotMatch(await page.locator('#foodResults').textContent(),/Restaurante de prueba/);
+    await page.click('#foodResults button');
+    await page.evaluate(()=>show('dayPlanner'));
+    assert.match(await page.locator('#dpList').textContent(),/Plaza de prueba/);assert.match(await page.locator('#dpList').textContent(),/Café de prueba/);
+    await page.evaluate(()=>show('dining'));
+    for(const [key,value] of Object.entries({people:'3',days:'3',meals:'2',mealPrice:'20',drinks:'1',drinkPrice:'5',extra:'10'}))await page.fill('#food-'+key,value);
+    assert.match(await page.locator('#foodEstimate').textContent(),/445,50/);
+    await page.getByRole('button',{name:'Usar total previsto en el presupuesto'}).click();
+    assert.equal(await page.locator('.cost[data-cost="comidas"]').inputValue(),'445.5');
+    await page.reload({waitUntil:'domcontentloaded'});await page.evaluate(()=>show('dining'));
+    assert.equal(await page.locator('#food-mealPrice').inputValue(),'20');
+    assert.match(await page.locator('#foodEstimate').textContent(),/445,50/);
+    await page.evaluate(()=>show('dayPlanner'));assert.match(await page.locator('#dpList').textContent(),/Café de prueba/);
+    results.push('Gastronomía: buscar, filtrar, añadir sin borrar visitas, estimar grupo y conservar presupuesto');
     await page.evaluate(() => show('home'));
     await page.screenshot({ path: 'artifacts/inicio-390.png', fullPage: true });
     assert.deepEqual(errors, []);

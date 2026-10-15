@@ -2,7 +2,7 @@ name: Android en emulador
 on:
   push:
     branches: [codex/auditoria-android-2026-10-15]
-    paths: ['android/**', 'native/**', 'index.html', 'backup.js', 'geo-planner.js', 'package*.json', 'capacitor.config.json', '.github/workflows/android-device.yml']
+    paths: ['android/**', 'native/**', 'index.html', 'backup.js', 'geo-planner.js', 'dining*.js', 'package*.json', 'capacitor.config.json', '.github/workflows/android-device.yml']
   workflow_dispatch:
 permissions:
   contents: read

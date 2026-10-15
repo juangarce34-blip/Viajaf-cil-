@@ -1,10 +1,12 @@
 const ENDPOINT = 'https://viajafacil-conexion.fairflute64.chatgpt.site/api/geo';
 
 // Only the existing public geo endpoint uses native HTTP. The PWA keeps browser fetch.
-export function createGeoFetch(nativeGet) {
+export function createGeoFetch(nativeGet) { return createFetch(nativeGet, ENDPOINT); }
+export function createDiningFetch(nativeGet) { return createFetch(nativeGet, 'https://overpass.private.coffee/api/interpreter'); }
+function createFetch(nativeGet, endpoint) {
   return async (input, { signal } = {}) => {
     const url = new URL(String(input));
-    if (url.origin + url.pathname !== ENDPOINT || url.username || url.password)
+    if (url.origin + url.pathname !== endpoint || url.username || url.password)
       throw new TypeError('Consulta de lugares no permitida.');
     if (signal?.aborted) throw new DOMException('Consulta cancelada', 'AbortError');
     let abort;
@@ -14,10 +16,11 @@ export function createGeoFetch(nativeGet) {
     });
     try {
       const response = await Promise.race([
-        nativeGet({ url: url.href, connectTimeout: 20000, readTimeout: 20000, responseType: 'json', disableRedirects: true }),
+        nativeGet({ url: url.href, connectTimeout: 20000, readTimeout: 20000, responseType: 'json', disableRedirects: true, headers: endpoint === ENDPOINT ? {} : {'User-Agent':'ViajaFacil/0.18 (https://github.com/juangarce34-blip/Viajaf-cil-)'} }),
         aborted
       ]);
       return {
+        status: response.status,
         ok: response.status >= 200 && response.status < 300,
         json: async () => typeof response.data === 'string' ? JSON.parse(response.data) : response.data
       };

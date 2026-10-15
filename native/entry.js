@@ -1,10 +1,11 @@
 import { Capacitor, CapacitorHttp, registerPlugin } from '@capacitor/core';
 import { App } from '@capacitor/app';
-import { createGeoFetch } from './geo-fetch.mjs';
+import { createGeoFetch, createDiningFetch } from './geo-fetch.mjs';
 
 if (Capacitor.isNativePlatform()) {
   const TravelFiles = registerPlugin('TravelFiles');
   window.vfGeoFetch = createGeoFetch(options => CapacitorHttp.get(options));
+  window.vfDiningFetch = createDiningFetch(options => CapacitorHttp.get(options));
   const status = message => window.vf9Status(message);
   let exporting = false;
   window.vf9Export = async () => {
