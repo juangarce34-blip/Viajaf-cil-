@@ -9,15 +9,12 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: Consultar categorías de comida en Los Ángeles
+      - name: Diagnóstico acotado de Overpass
         run: |
           node --input-type=module <<'JS'
-          const base='https://viajafacil-conexion.fairflute64.chatgpt.site/api/geo';
-          for(const categories of ['catering.restaurant','catering.cafe','catering.bar,catering.pub']){
-            const url=new URL(base);
-            for(const [k,v] of Object.entries({mode:'places',lon:-118.2437,lat:34.0522,radius:5000,categories}))url.searchParams.set(k,v);
-            const r=await fetch(url,{signal:AbortSignal.timeout(20000)});
-            const d=await r.json();
-            console.log(JSON.stringify({categories,status:r.status,error:d.error,count:d.features?.length,sample:d.features?.slice(0,1).map(f=>({name:f.properties?.name,categories:f.properties?.categories,fields:Object.keys(f.properties||{})}))}));
+          for(const memory of [2097152,33554432]){
+            const query='[out:json][timeout:15][maxsize:'+memory+'];nwr(around:2000,34.0522,-118.2437)["amenity"~"^(restaurant|cafe|bar|pub|fast_food|ice_cream)$"]["name"];out center 80;';
+            const url=new URL('https://overpass.private.coffee/api/interpreter');url.searchParams.set('data',query);
+            try{const r=await fetch(url,{headers:{'User-Agent':'ViajaFacil/0.18 (https://github.com/juangarce34-blip/Viajaf-cil-)'},signal:AbortSignal.timeout(20000)});const raw=await r.text();let data;try{data=JSON.parse(raw)}catch{}console.log(JSON.stringify({memory,status:r.status,count:data?.elements?.length,remark:data?.remark,body:r.ok?undefined:raw.slice(0,1500)}));}catch(e){console.log(JSON.stringify({memory,error:e.message}));}
           }
           JS
