@@ -1,5 +1,5 @@
-// ViajaFácil RC10: cache isolated to this app, network-first for pages.
-const CACHE='viajafacil-rc10-v1';
+// ViajaFácil RC11: cache isolated to this app, network-first for pages.
+const CACHE='viajafacil-rc11-v1';
 const PREFIX='viajafacil-';
 const ASSETS=['./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
 self.addEventListener('install', event => {
