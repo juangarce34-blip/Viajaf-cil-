@@ -23,7 +23,7 @@ AAB: `android/app/build/outputs/bundle/release/app-release.aab`.
 
 Pruebas en dispositivo/emulador conectado: `./gradlew :app:connectedDebugAndroidTest`. La ejecución API 35 de entrega pasó las dos pruebas de arranque/persistencia y apertura/cancelación de copia grande; consultar la auditoría para los enlaces a informes. Los dispositivos antiguos necesitan Android System WebView actualizado para las API web modernas que ya utiliza la PWA.
 
-El workflow **Android de prueba** compila en la rama independiente, conserva los informes y el APK durante 30 días y no publica en Google Play ni despliega GitHub Pages. El AAB de esta fase es **sin firma de distribución**. No se debe subir todavía a Google Play. La firma debug automática de CI puede cambiar entre ejecuciones; para actualizar una instalación debug existente puede ser necesario desinstalarla. Exportar antes los viajes para no perderlos.
+El workflow **Android de prueba** compila en la rama independiente y conserva informes durante 30 días. No publica en Google Play ni despliega GitHub Pages. Sin secretos de firma, entrega únicamente informes y AAB sin firma; el APK debug se usa internamente y no se entrega. Con la clave persistente configurada y verificada, entrega APK y AAB firmados en un artefacto separado. Consultar el incidente de firma y los pasos de activación al final de este documento. No subir todavía a Google Play.
 
 ## Archivos y datos
 
@@ -89,3 +89,5 @@ Si ya existe una clave oficial de la app, usarla; no generar otra sin comprobarl
 Una vez configurados, volver a ejecutar **Android de prueba** sobre esta rama. El script reconstruye `release`, verifica certificado y APK, y entrega APK y AAB firmados sin publicar. En cada actualización, aumentar `versionCode` en `android/app/build.gradle`, conservar el identificador y la misma clave. Las claves se restauran solo en un directorio temporal con permisos privados y se eliminan al terminar. El AAB firmado queda preparado para revisión, sin subir a Google Play. Play App Signing requiere decidir la política de clave de subida y certificado de distribución antes de publicar.
 
 Pendiente de validación: compilar con los secretos reales y probar una actualización firmada sobre otra con la misma clave conservando los viajes. La configuración preparada no certifica todavía esa actualización.
+
+Validación de la corrección (`adff060b17b6671055cdebfa351dbbd746ad80a6`): pruebas locales de datos correctas; script sin secretos omite la entrega, configuración parcial falla y certificado inesperado falla antes de compilar. [CI Android 38825894473](https://github.com/juangarce34-blip/Viajaf-cil-/actions/runs/38825894473) y [emulador 38825894404](https://github.com/juangarce34-blip/Viajaf-cil-/actions/runs/38825894404) terminaron correctamente. Se verificó que solo se entregó el artefacto de informes; no hubo APK de firma fija por falta de secretos.
