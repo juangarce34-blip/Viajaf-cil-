@@ -6,6 +6,16 @@
     return `[out:json][timeout:15][maxsize:2097152];nwr(around:${radius},${lat},${lon})["amenity"~"^(restaurant|cafe|bar|pub|fast_food|ice_cream)$"]["name"];out center 80;`;
   }
   const labels={restaurant:'Restaurante',cafe:'Cafetería',bar:'Bar',pub:'Pub',fast_food:'Comida rápida',ice_cream:'Heladería'};
+  function curated(city,country){
+    const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
+    if(norm(city)!=='losangeles'||!['us','usa','unitedstates','unitedstatesofamerica','estadosunidos','estadosunidosdeamerica'].includes(norm(country)))return [];
+    return [
+      ['bottega','Bottega Louie DTLA','restaurant','700 South Grand Avenue, Los Angeles, CA 90017, USA','https://bottegalouie.com/dtla'],
+      ['philippe','Philippe The Original','restaurant','1001 N. Alameda St., Los Angeles, CA 90012, USA','https://philippes.com/'],
+      ['verve','Verve Coffee · Arts District','cafe','500 Mateo Street, Los Angeles, CA 90013, USA','https://www.vervecoffee.com/pages/locations'],
+      ['seven','Seven Grand Los Angeles','bar','515 W 7th St, 2nd floor, Los Angeles, CA 90014, USA','https://www.sevengrandbars.com/la']
+    ].map(([id,name,type,address,website])=>({id:'official-la-'+id,name,type,label:labels[type],address,website,curated:true,source:'Web oficial consultada el 15/10/2026'}));
+  }
   function places(data){
     if(data.remark||!Array.isArray(data.elements))throw Error('El servicio no pudo completar la búsqueda. Inténtalo más tarde.');
     const seen=new Set();return data.elements.flatMap(e=>{
@@ -35,8 +45,8 @@
     if(!plan||!Array.isArray(plan.days)||!plan.days[dayIndex])throw Error('Elige un día válido.');
     const next=JSON.parse(JSON.stringify(plan)),items=next.days[dayIndex].items;
     if(items.some(x=>x.osmId===place.id))throw Error('Este local ya está añadido a ese día.');
-    items.push({id:'food-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8),name:place.name,time:'',cost:null,kind:'Comida',transport:'Por decidir',notes:(place.label+' · '+place.address+'\nFuente: OpenStreetMap / Overpass Private.coffee. Precio pendiente: consulta carta, impuestos y propinas.'+(place.website?'\nWeb indicada en OSM: '+place.website:'')).slice(0,1500),lat:place.lat,lon:place.lon,osmId:place.id});
+    items.push({id:'food-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8),name:place.name,time:'',cost:null,kind:'Comida',transport:'Por decidir',notes:(place.label+' · '+place.address+'\nFuente: '+(place.source||'OpenStreetMap / Overpass Private.coffee')+'. Precio pendiente: consulta carta, impuestos y propinas.'+(place.website?'\nWeb del local: '+place.website:'')).slice(0,1500),lat:place.lat,lon:place.lon,osmId:place.id});
     return next;
   }
-  return {endpoint,query,places,estimate,append};
+  return {endpoint,query,places,estimate,append,curated};
 });

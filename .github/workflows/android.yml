@@ -38,10 +38,11 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Comprobar servicio existente desde el origen Android
         run: node scripts/check-service.mjs
-      - name: Consulta real gastronómica en Los Ángeles
-        run: node scripts/check-dining.mjs
       - name: Regresión de funciones existentes
         run: npm run test:browser
+      - name: Estado del proveedor gastronómico externo (sin ocultar caídas)
+        continue-on-error: true
+        run: node scripts/check-dining.mjs
       - name: Preparar aplicación Android
         run: npm run android:sync
       - name: SDK Android

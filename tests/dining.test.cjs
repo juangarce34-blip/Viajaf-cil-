@@ -30,3 +30,9 @@ test('cliente HTTP gastronómico solo permite su endpoint público gratuito',asy
  const response=await request(d.endpoint+'?data=test');assert.equal(response.ok,true);assert.equal(calls,1);
  await assert.rejects(request('https://example.com/api/interpreter'),TypeError);assert.equal(calls,1);
 });
+test('selección oficial solo se aplica a Los Ángeles de Estados Unidos, sin coordenadas o precios inventados',()=>{
+ const places=d.curated('Los Ángeles','Estados Unidos');assert.equal(places.length,4);
+ assert.equal(places.filter(p=>p.type==='cafe').length,1);assert.equal(places.filter(p=>p.type==='bar').length,1);
+ for(const p of places){assert.equal(p.lat,undefined);assert.equal(p.curated,true);assert.match(p.website,/^https:\/\//)}
+ assert.equal(d.curated('Los Ángeles','Chile').length,0);assert.equal(d.curated('Madrid','España').length,0);
+});
