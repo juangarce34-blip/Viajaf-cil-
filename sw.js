@@ -1,5 +1,5 @@
 // ViajaFácil RC16: cache isolated to this app, network-first for pages.
-const CACHE='viajafacil-rc16-v1';
+const CACHE='viajafacil-rc16-v2';
 const PREFIX='viajafacil-';
 const ASSETS=['./index.html','./geo-planner.js','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
 self.addEventListener('install', event => {
