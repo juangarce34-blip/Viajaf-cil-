@@ -16,7 +16,7 @@ function createFetch(nativeGet, endpoint) {
     });
     try {
       const response = await Promise.race([
-        nativeGet({ url: url.href, connectTimeout: 20000, readTimeout: 20000, responseType: 'json', disableRedirects: true, headers: endpoint === ENDPOINT ? {} : {'User-Agent':'ViajaFacil/0.19 (https://github.com/juangarce34-blip/Viajaf-cil-)'} }),
+        nativeGet({ url: url.href, connectTimeout: 20000, readTimeout: 20000, responseType: 'json', disableRedirects: true, headers: endpoint === ENDPOINT ? {} : {'User-Agent':'ViajaFacil/0.20 (https://github.com/juangarce34-blip/Viajaf-cil-)'} }),
         aborted
       ]);
       return {

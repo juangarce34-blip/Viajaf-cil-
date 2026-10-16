@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const ViajaBackup = require('../backup.js');
 const html = fs.readFileSync('index.html', 'utf8');
-const source = html.slice(html.indexOf('async function vf9Import()'), html.indexOf('\n</script>', html.indexOf('async function vf9Import()')));
+const source = html.slice(html.indexOf('async function vf9Import('), html.indexOf('\n</script>', html.indexOf('async function vf9Import(')));
 
 function fixture() {
   return { app: 'ViajaFácil', format: 'viajafacil-backup', version: 1, data: {

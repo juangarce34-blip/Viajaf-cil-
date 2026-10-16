@@ -81,6 +81,7 @@ jobs:
             android/app/build/outputs/bundle/release/app-release.aab
             android/app/build/reports/
             artifacts/*.json
+            artifacts/*.png
             APK-SHA256.txt
             APK-METADATA.txt
             package-lock.json

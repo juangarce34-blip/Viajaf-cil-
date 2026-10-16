@@ -5,7 +5,7 @@ const $=id=>document.getElementById(id), input=$('destinationQuery'), form=$('de
 const results=$('destinationResults'), status=$('destinationStatus'), submit=$('destinationSearch');
 const node=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n};
 let revision=0, originTrip='';
-function choose(destination){ui.choose([destination.name,destination.country])}
+function choose(destination){ui.choose([destination.name,destination.country,null,null,destination.kind==='city'?destination:null])}
 function card(destination){
   const button=node('button');button.type='button';button.className='card';
   button.style.cssText='display:block;width:100%;text-align:left';

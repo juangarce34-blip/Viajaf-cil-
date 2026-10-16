@@ -16,9 +16,11 @@ if (Capacitor.isNativePlatform()) {
       const data = window.ViajaBackup.serialize(window.vf9All());
       const result = await TravelFiles.saveBackup({ data,
         name: `ViajaFacil-copia-${new Date().toISOString().slice(0, 10)}.json` });
-      status(result.cancelled ? 'Exportación cancelada. Tus viajes se conservan.' : 'Copia guardada en la ubicación elegida.');
+      status(result.cancelled ? 'Guardado cancelado. Tus viajes se conservan.' : 'Copia guardada en la ubicación elegida.');
+      return !result.cancelled;
     } catch (error) {
-      status('No se pudo exportar: ' + error.message);
+      status('No se pudo guardar la copia: ' + error.message);
+      return false;
     } finally { exporting = false; }
   };
 
