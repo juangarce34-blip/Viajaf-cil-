@@ -114,6 +114,7 @@ const path = require('node:path');
     await page.evaluate(()=>show('dining'));
     for(const [key,value] of Object.entries({people:'3',days:'3',meals:'2',mealPrice:'20',drinks:'1',drinkPrice:'5',extra:'10'}))await page.fill('#food-'+key,value);
     assert.match(await page.locator('#foodEstimate').textContent(),/445,50/);
+    await page.evaluate(()=>document.querySelector('.cost[data-cost="comidas"]').value='1');
     page.once('dialog',d=>d.accept());await page.getByRole('button',{name:'Usar total previsto en el presupuesto'}).click();
     assert.equal(await page.locator('.cost[data-cost="comidas"]').inputValue(),'445.5');
     await page.reload({waitUntil:'domcontentloaded'});await page.evaluate(()=>show('dining'));
