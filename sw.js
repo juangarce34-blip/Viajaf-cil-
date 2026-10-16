@@ -20,10 +20,10 @@ self.addEventListener('fetch', event => {
     event.respondWith(fetch(req).then(response => {
       if(response.ok){
         const copy=response.clone();
-        caches.open(CACHE).then(cache => cache.put(new URL('./index.html','./journey.js','./journey.css',scope).href,copy)).catch(()=>{});
+        caches.open(CACHE).then(cache => cache.put(new URL('./index.html',scope).href,copy)).catch(()=>{});
       }
       return response;
-    }).catch(async () => (await caches.match(new URL('./index.html','./journey.js','./journey.css',scope).href)) || Response.error()));
+    }).catch(async () => (await caches.match(new URL('./index.html',scope).href)) || Response.error()));
     return;
   }
   if(!ASSETS.some(asset => new URL(asset,scope).pathname===url.pathname)) return;
