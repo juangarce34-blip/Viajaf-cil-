@@ -2,6 +2,10 @@
 
 Se conserva la PWA RC16 y su almacenamiento por viajes. Capacitor 7.6.9 incluye sus archivos en el APK, con origen estable `https://localhost`. No hay anuncios, compras, registro obligatorio ni servicios nuevos de pago. Identificador inicial: `com.viajafacil.app`; confirmar su disponibilidad antes de una publicación.
 
+## Ejecución firmada actual
+
+Consultar [EJECUCION-FIRMADA.md](EJECUCION-FIRMADA.md) para la ejecución desde la rama sin modificar main, la configuración de los cinco secretos y la verificación criptográfica de APK y AAB. En esta rama, la firma ahora es obligatoria: si falta un secreto o el almacén no es válido, el job falla al inicio. Las descripciones de compilaciones sin secretos de las entregas anteriores son históricas. El botón Run workflow requiere que el workflow exista en la rama predeterminada; mientras no se autorice ese cambio se usa push o Re-run jobs.
+
 ## Compilar
 
 Requisitos: Node 22, Java 21, Android SDK 36 y build-tools 36.0.0. Gradle 8.13 y Android Gradle Plugin 8.13.2 están fijados en el proyecto.
