@@ -1,19 +1,25 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# CI debug keys are temporary. Only distribute APKs signed by the pinned key.
-configured=0
-for variable in VF_SIGNING_KEYSTORE_BASE64 VF_SIGNING_STORE_PASSWORD VF_SIGNING_ALIAS VF_SIGNING_KEY_PASSWORD VF_SIGNING_CERT_SHA256; do
-  if [[ -n ${!variable:-} ]]; then configured=$((configured + 1)); fi
-done
-if [[ $configured -eq 0 ]]; then
-  echo '::notice::Firma fija pendiente: solo se generan informes y AAB sin firma. No distribuir el APK debug.'
-  exit 0
+# Never enable shell tracing here: secret values must not reach logs.
+if [[ ${GITHUB_ACTIONS:-} == true ]]; then
+  if [[ ${GITHUB_REPOSITORY:-} != juangarce34-blip/Viajaf-cil- || ${GITHUB_REF:-} != refs/heads/codex/auditoria-android-2026-10-15 || ! ${GITHUB_EVENT_NAME:-} =~ ^(push|workflow_dispatch)$ ]]; then
+    echo '::error::La firma solo está permitida desde la rama Android autorizada, mediante push o ejecución manual.'
+    exit 1
+  fi
 fi
-if [[ $configured -ne 5 ]]; then
-  echo '::error::Configuración de firma incompleta: se requieren los cinco secretos VF_SIGNING_*.'
+if [[ $# -gt 1 || ( $# -eq 1 && $1 != --check ) ]]; then
+  echo 'Uso: bash scripts/sign-android.sh [--check]'
   exit 1
 fi
+missing=0
+for variable in VF_SIGNING_KEYSTORE_BASE64 VF_SIGNING_STORE_PASSWORD VF_SIGNING_ALIAS VF_SIGNING_KEY_PASSWORD VF_SIGNING_CERT_SHA256; do
+  if [[ -z ${!variable:-} ]]; then
+    echo "::error::Falta el secreto $variable. Revisa su nombre y disponibilidad en Actions."
+    missing=1
+  fi
+done
+[[ $missing -eq 0 ]] || exit 1
 
 umask 077
 signing_dir=$(mktemp -d)
@@ -22,29 +28,81 @@ export VF_SIGNING_STORE="$signing_dir/distribution.jks"
 python3 - <<'PY'
 import base64, os
 from pathlib import Path
-Path(os.environ['VF_SIGNING_STORE']).write_bytes(base64.b64decode(
-    os.environ['VF_SIGNING_KEYSTORE_BASE64'], validate=True))
+try:
+    # GitHub accepts multiline secrets; ignore base64 wrapping, validate all other bytes.
+    encoded=''.join(os.environ['VF_SIGNING_KEYSTORE_BASE64'].split())
+    decoded=base64.b64decode(encoded,validate=True)
+    if not decoded: raise ValueError()
+    Path(os.environ['VF_SIGNING_STORE']).write_bytes(decoded)
+except Exception:
+    raise SystemExit('::error::VF_SIGNING_KEYSTORE_BASE64 no contiene un almacén base64 válido.')
 PY
 unset VF_SIGNING_KEYSTORE_BASE64
 
-# Pin the public certificate before compiling, so an accidental key replacement fails.
+# Exercise the store password, alias and private-key password without printing them.
+if ! keytool -certreq -keystore "$VF_SIGNING_STORE" -alias "$VF_SIGNING_ALIAS" \
+  -storepass:env VF_SIGNING_STORE_PASSWORD -keypass:env VF_SIGNING_KEY_PASSWORD \
+  -file "$signing_dir/check.csr" > "$signing_dir/key-check.log" 2>&1; then
+  echo '::error::No se pudo usar la clave privada. Revisa el almacén, VF_SIGNING_ALIAS y ambas contraseñas.'
+  exit 1
+fi
 keytool -exportcert -keystore "$VF_SIGNING_STORE" \
   -alias "$VF_SIGNING_ALIAS" -storepass:env VF_SIGNING_STORE_PASSWORD \
-  -file "$signing_dir/certificate.der" >/dev/null
+  -file "$signing_dir/certificate.der" > "$signing_dir/cert-export.log" 2>&1
 actual=$(sha256sum "$signing_dir/certificate.der" | cut -d ' ' -f 1)
-expected=$(printf '%s' "$VF_SIGNING_CERT_SHA256" | tr -d ':[:space:]' | tr '[:upper:]' '[:lower:]')
+expected=$(python3 - <<'PY'
+import os,re
+value=os.environ['VF_SIGNING_CERT_SHA256'].strip()
+value=re.sub(r'^SHA-?256\s*:\s*','',value,flags=re.I)
+print(re.sub(r'[:\s]','',value).lower())
+PY
+)
 if [[ ! $expected =~ ^[0-9a-f]{64}$ || "$actual" != "$expected" ]]; then
-  echo '::error::La clave no coincide con el certificado fijado. No se entrega ningún APK.'
+  echo '::error::VF_SIGNING_CERT_SHA256 no coincide con el certificado del almacén. No se entrega ningún archivo firmado.'
   exit 1
+fi
+if [[ ${VF_SIGNING_ALIAS,,} == androiddebugkey ]]; then
+  echo '::error::No se permite distribuir con la clave debug de Android.'
+  exit 1
+fi
+if [[ ${1:-} == --check ]]; then
+  echo 'Cinco secretos disponibles; almacén, alias, contraseñas y certificado verificados.'
+  exit 0
 fi
 
 (cd android && bash gradlew --no-daemon assembleRelease bundleRelease lintRelease)
 apksigner="$ANDROID_HOME/build-tools/36.0.0/apksigner"
 apk=android/app/build/outputs/apk/release/app-release.apk
-"$apksigner" verify --verbose --print-certs "$apk" > "$signing_dir/verification.txt"
-grep -Fqi "Signer #1 certificate SHA-256 digest: $actual" "$signing_dir/verification.txt"
+aab=android/app/build/outputs/bundle/release/app-release.aab
+"$apksigner" verify --verbose --print-certs "$apk" > "$signing_dir/apk-verification.txt"
+python3 - "$signing_dir/apk-verification.txt" "$actual" <<'PY'
+from pathlib import Path
+import re,sys
+certificates=re.findall(r'^Signer #\d+ certificate SHA-256 digest: ([0-9a-f]+)$',Path(sys.argv[1]).read_text(),re.M|re.I)
+if [c.lower() for c in certificates] != [sys.argv[2]]:
+    raise SystemExit('::error::El certificado del APK no coincide con el único firmante esperado.')
+PY
+java scripts/VerifyBundleSignature.java "$aab" "$actual" > "$signing_dir/aab-verification.txt"
+"$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging "$apk" > "$signing_dir/apk-metadata.txt"
+if grep -q 'application-debuggable' "$signing_dir/apk-metadata.txt"; then
+  echo '::error::El APK no debe ser depurable.'
+  exit 1
+fi
+
+# Only verified public outputs are copied. The private store never leaves the temporary directory.
 mkdir -p artifacts/distribucion
 cp "$apk" artifacts/distribucion/ViajaFacil-firma-fija.apk
-cp android/app/build/outputs/bundle/release/app-release.aab artifacts/distribucion/ViajaFacil-firma-fija.aab
-cp "$signing_dir/verification.txt" artifacts/distribucion/CERTIFICADO.txt
+cp "$aab" artifacts/distribucion/ViajaFacil-firma-fija.aab
+cp "$signing_dir/apk-verification.txt" artifacts/distribucion/APK-FIRMA.txt
+cp "$signing_dir/aab-verification.txt" artifacts/distribucion/AAB-FIRMA.txt
+cp "$signing_dir/apk-metadata.txt" artifacts/distribucion/APK-METADATA.txt
+python3 - <<'PY'
+import json,os
+from pathlib import Path
+Path('artifacts/distribucion/BUILD.json').write_text(json.dumps({
+    'commit':os.getenv('GITHUB_SHA'),'branch':os.getenv('GITHUB_REF_NAME'),
+    'run':os.getenv('GITHUB_RUN_ID'),'secretsValidated':5,'apkCertificateVerified':True,
+    'aabCertificateVerified':True,'published':False},indent=2))
+PY
 (cd artifacts/distribucion && sha256sum *.apk *.aab > SHA256.txt)
+echo 'APK y AAB release firmados con el mismo certificado, verificados y preparados como artefactos. Sin publicación.'
