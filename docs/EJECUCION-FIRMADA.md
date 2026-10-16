@@ -56,7 +56,7 @@ $vfKeystorePath = 'C:\ruta\ViajaFacil.jks'
 
 El lector admite saltos de línea, comillas de copia, envoltura certutil y ausencia de padding; después exige igualmente almacén válido, clave privada y certificado fijado. Nunca genera ni sustituye la clave para conseguir que pase una comprobación. Si un secreto es incorrecto, la ejecución falla sin entregar APK/AAB.
 
-## Estado de la comprobación real
+## Comprobaciones iniciales (intento 1)
 
 Código de la solución: `3fce5fdfe73efed3ffd145e8c8278917e4b63296`.
 
@@ -68,3 +68,26 @@ Código de la solución: `3fce5fdfe73efed3ffd145e8c8278917e4b63296`.
 - Main verificada sin cambios: `b4c713c4d52c829e6d9fef5029eef03e8e8e3896`. No se modificó su rama ni se publicó ningún producto.
 
 Una vez corregido el secreto, usar Re-run jobs en la segunda ejecución, o reejecutar únicamente su job fallido. Se conserva el código de la solución y se vuelve a validar el almacén antes de compilar. El certificado fijado impide aceptar una clave distinta por accidente.
+
+## Entrega firmada confirmada (intento 2)
+
+Tras corregir el secreto en GitHub, se reejecutó únicamente el job fallido. [Ejecución 38967464543, intento 2](https://github.com/juangarce34-blip/Viajaf-cil-/actions/runs/38967464543/attempts/2): **correcta**. Código `3fce5fdfe73efed3ffd145e8c8278917e4b63296`, rama `codex/auditoria-android-2026-10-15`.
+
+Los cinco secretos se utilizaron correctamente: almacén base64, alias, contraseña del almacén, contraseña de la clave y huella esperada. La comprobación previa pasó, se ejecutaron las pruebas de datos, navegador y firma y se construyeron APK y AAB release. Ambos certificados coinciden con la huella fijada; el APK no es depurable. El verificador del AAB comprobó todas las entradas de contenido firmadas.
+
+Artefacto de CI: **ViajaFacil-Android-firma-fija**, ID `12076325459`, retención 30 días. Contiene APK, AAB, certificados públicos/verificaciones, metadatos y hashes; no contiene el almacén privado ni contraseñas. BUILD.json registra cinco secretos validados y las dos verificaciones correctas.
+
+Certificado público SHA-256, extraído de los archivos finales:
+
+`1119e73a9d7343c1879a612c918fed5a349d47dc8d41fdb491704d83aa27c55f`
+
+SHA-256 de los binarios entregados (el renombrado no modifica sus bytes):
+
+- APK 0.21.0, applicationId `com.viajafacil.app`, versionCode 5: `0e242afd26fa64939f234a78f878f031a4f993ba9ff3523d6a658a65e8a95bda`.
+- AAB 0.21.0 firmado: `d599037ffe0f7ae98e185255d4f5e65eb217731cbbfe05d65621a3baabca0e84`.
+
+Se descargó el artefacto, se recalcularon los hashes, se comprobó localmente el certificado del APK con keytool y se volvió a verificar criptográficamente el AAB con VerifyBundleSignature.java. Todo correcto. La clave privada no se descargó ni se expuso.
+
+Entrega local: `/workspace/viajafacil-entrega-0.21-firmada/`; paquete `/workspace/ViajaFacil-Android-0.21.0-firmada.zip`, con instrucciones para migrar desde los APK debug anteriores.
+
+Main continúa en `b4c713c4d52c829e6d9fef5029eef03e8e8e3896`. No hay modificación de main, release publicada, subida a Google Play ni despliegue web. El AAB firmado queda preparado para revisión; la publicación y Play App Signing siguen requiriendo decisión del propietario. Esta ejecución no sustituye las pruebas de instalación y actualización en el móvil.

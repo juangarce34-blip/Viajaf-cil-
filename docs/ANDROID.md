@@ -4,6 +4,8 @@ Se conserva la PWA RC16 y su almacenamiento por viajes. Capacitor 7.6.9 incluye 
 
 ## Ejecución firmada actual
 
+Firma fija activada y verificada: APK y AAB 0.21.0 firmados en la ejecución 38967464543, intento 2. Certificados y hashes comprobados también tras descargar los artefactos. Consultar el informe de ejecución para los detalles; los bloqueos y pasos pendientes de firma de entregas anteriores son históricos. No hay publicación en Google Play.
+
 Consultar [EJECUCION-FIRMADA.md](EJECUCION-FIRMADA.md) para la ejecución desde la rama sin modificar main, la configuración de los cinco secretos y la verificación criptográfica de APK y AAB. En esta rama, la firma ahora es obligatoria: si falta un secreto o el almacén no es válido, el job falla al inicio. Las descripciones de compilaciones sin secretos de las entregas anteriores son históricas. El botón Run workflow requiere que el workflow exista en la rama predeterminada; mientras no se autorice ese cambio se usa push o Re-run jobs.
 
 ## Compilar
