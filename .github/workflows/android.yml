@@ -38,6 +38,8 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Comprobar servicio existente desde el origen Android
         run: node scripts/check-service.mjs
+      - name: Cobertura real del buscador mundial
+        run: node scripts/check-destinations.mjs
       - name: Regresión de funciones existentes
         run: npm run test:browser
       - name: Estado del proveedor gastronómico externo (sin ocultar caídas)
