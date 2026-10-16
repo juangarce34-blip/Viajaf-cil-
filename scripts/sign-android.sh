@@ -26,16 +26,26 @@ signing_dir=$(mktemp -d)
 trap 'rm -rf "$signing_dir"' EXIT
 export VF_SIGNING_STORE="$signing_dir/distribution.jks"
 python3 - <<'PY'
-import base64, os
+import base64, json, os, re
 from pathlib import Path
 try:
-    # GitHub accepts multiline secrets; ignore base64 wrapping, validate all other bytes.
-    encoded=''.join(os.environ['VF_SIGNING_KEYSTORE_BASE64'].split())
-    decoded=base64.b64decode(encoded,validate=True)
+    value=os.environ['VF_SIGNING_KEYSTORE_BASE64'].strip().lstrip('\ufeff').strip()
+    # Accept common copy envelopes, but never guess or generate a different key.
+    if len(value)>1 and value[0]==value[-1] and value[0] in ('"', "'"):
+        try: value=json.loads(value) if value[0]=='"' else value[1:-1]
+        except json.JSONDecodeError: value=value[1:-1]
+    if not isinstance(value,str): raise ValueError()
+    if value.startswith('-----BEGIN CERTIFICATE-----') and value.endswith('-----END CERTIFICATE-----'):
+        value=value[len('-----BEGIN CERTIFICATE-----'):-len('-----END CERTIFICATE-----')]
+    if value.startswith('data:') and ';base64,' in value: value=value.split(';base64,',1)[1]
+    encoded=''.join(value.split())
+    encoded+='='*((-len(encoded))%4)
+    decoded=base64.b64decode(encoded,altchars=b'-_',validate=True)
     if not decoded: raise ValueError()
     Path(os.environ['VF_SIGNING_STORE']).write_bytes(decoded)
 except Exception:
-    raise SystemExit('::error::VF_SIGNING_KEYSTORE_BASE64 no contiene un almacén base64 válido.')
+    raise SystemExit('::error::VF_SIGNING_KEYSTORE_BASE64 no es base64 válido. Regenera el secreto desde el archivo original del almacén, no desde su nombre o ruta.')
+
 PY
 unset VF_SIGNING_KEYSTORE_BASE64
 

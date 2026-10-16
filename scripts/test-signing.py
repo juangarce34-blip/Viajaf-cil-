@@ -2,6 +2,7 @@
 import base64
 import hashlib
 import os
+import shutil
 from pathlib import Path
 import subprocess
 import tempfile
@@ -45,6 +46,11 @@ with tempfile.TemporaryDirectory(prefix='vf-signing-tests-') as temp:
                                 'SHA256: ' + ':'.join(fingerprint[i:i+2] for i in range(0,64,2)).upper()])))
     run(['bash', script, '--check'], env)
     print('PASS: cinco secretos, base64 multilinea y huella con formato keytool')
+    standard=base64.b64encode(store.read_bytes()).decode()
+    for wrapped in ["'"+standard+"'", '-----BEGIN CERTIFICATE-----\n'+encoded+'-----END CERTIFICATE-----',
+                    'data:application/octet-stream;base64,'+standard, standard.rstrip('=')]:
+        run(['bash',script,'--check'],{**env,'VF_SIGNING_KEYSTORE_BASE64':wrapped})
+    print('PASS: formato certutil, comillas, data URI y padding omitido conservan la misma clave')
     for name, value in [('VF_SIGNING_CERT_SHA256', '00' * 32), ('VF_SIGNING_ALIAS', 'missing'),
                         ('VF_SIGNING_KEY_PASSWORD', 'incorrect-test-password'),
                         ('VF_SIGNING_STORE_PASSWORD', 'incorrect-test-store-password'),
@@ -59,7 +65,8 @@ with tempfile.TemporaryDirectory(prefix='vf-signing-tests-') as temp:
         bundle.writestr('base/manifest/AndroidManifest.xml', b'fixture payload')
     run(['java', verifier, str(unsigned), fingerprint], env, success=False)
     signed = directory / 'signed.aab'
-    run(['jarsigner', '-keystore', str(store), '-storepass:env', 'FIXTURE_STORE_PASS',
+    signer=['jarsigner'] if shutil.which('jarsigner') else ['java','-m','jdk.jartool/sun.security.tools.jarsigner.Main']
+    run(signer + ['-keystore', str(store), '-storepass:env', 'FIXTURE_STORE_PASS',
          '-keypass:env', 'FIXTURE_KEY_PASS', '-signedjar', str(signed), str(unsigned), 'fixture'], env)
     run(['java', verifier, str(signed), fingerprint], env)
     run(['java', verifier, str(signed), '00' * 32], env, success=False)

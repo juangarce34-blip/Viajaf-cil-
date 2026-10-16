@@ -37,10 +37,21 @@ El build `release` utiliza la configuración `stable` de Gradle con las variable
 - Solo después de verificar ambos se copian a `ViajaFacil-Android-firma-fija`: APK, AAB, informes públicos de certificado, metadatos, SHA256 de ambos archivos y `BUILD.json` con commit/rama/ejecución. La subida exige que existan los archivos.
 - El artefacto de informes generales no incluye un AAB sin verificar, ni APK debug, ni almacén privado.
 
-Las pruebas utilizan claves desechables para aceptar la configuración válida y rechazar secretos ausentes, base64 incorrecto, contraseñas/alias erróneos, otra huella, ejecución desde PR/main, AAB sin firma y AAB manipulado. El entorno local no tiene el ejecutable jarsigner completo: las pruebas que lo requieren se ejecutan en CI con JDK 21.
+Las pruebas utilizan claves desechables para aceptar la configuración válida y rechazar secretos ausentes, base64 incorrecto, contraseñas/alias erróneos, otra huella, ejecución desde PR/main, AAB sin firma y AAB manipulado. Las pruebas usan el ejecutable jarsigner o el módulo equivalente de JDK 21 cuando ese ejecutable no está en PATH.
 
 La disponibilidad de los secretos se comprueba mediante el job de Actions; la conexión usada no puede leer ni enumerar secretos. No se pide compartirlos por chat.
 
 ## Instalación
 
 El APK firmado se puede instalar directamente en una instalación nueva. Las versiones 0.17/0.18 anteriores usaban certificados debug diferentes: no admiten actualización directa con la clave fija. Exportar viajes, comprobar la copia y solo entonces sustituir la instalación e importar. Las actualizaciones futuras deben mantener identificador/clave y aumentar versionCode. El AAB queda preparado como archivo de subida; publicarlo en Google Play requiere autorización y los trámites de Play App Signing.
+
+## Generar base64 con PowerShell
+
+Usar el archivo privado original, sin codificar el texto de su ruta ni copiar los asteriscos con los que GitHub oculta un secreto. Este comando no imprime el valor; lo copia al portapapeles para pegarlo directamente en la configuración del secreto de GitHub:
+
+```powershell
+$vfKeystorePath = 'C:\ruta\ViajaFacil.jks'
+[Convert]::ToBase64String([IO.File]::ReadAllBytes($vfKeystorePath)) | Set-Clipboard
+```
+
+El lector admite saltos de línea, comillas de copia, envoltura certutil y ausencia de padding; después exige igualmente almacén válido, clave privada y certificado fijado. Nunca genera ni sustituye la clave para conseguir que pase una comprobación. Si un secreto es incorrecto, la ejecución falla sin entregar APK/AAB.
