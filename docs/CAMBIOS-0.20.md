@@ -28,3 +28,22 @@ Las pruebas cubren copia compatible, rechazo de archivos dañados, restauración
 El proveedor gastronómico externo ya presentó HTTP 500 y su disponibilidad sigue fuera de control de la app. La interfaz simplificada no implica que ese proveedor se haya reparado: se mantiene el error visible, selección oficial guardada cuando existe y acceso a mapas. No se inventan locales ni precios.
 
 La clave de firma fija todavía no está configurada. CI no entrega APK con claves debug efímeras. No existe un nuevo instalador distribuible hasta configurar los secretos y validar la firma y la actualización; la app instalada no se modifica por estos commits.
+
+## Registro de correcciones durante la validación
+
+Se adaptó la extracción de la función de restauración en sus pruebas al nuevo parámetro de confirmación guiada. Se añadió el alias Bahréin al resolvedor de países para que coincida con la denominación del directorio oficial. Ambos ajustes pasaron las 26 pruebas de datos. Se comprobó además la coherencia del perfil: indicar un pasaporte no español impide que las antiguas pantallas locales conserven la suposición de nacionalidad española.
+
+La primera regresión completa de esta entrega pasó 12 grupos en navegador, sin errores JavaScript. La inspección visual posterior encontró otro texto de Londres en la cabecera de planificación mundial y dos accesos equivalentes al itinerario; se retiraron y se añadió una comprobación explícita de ausencia de Londres y apertura del itinerario desde su tarjeta. La cabecera identifica ahora la versión 0.20.
+
+## Resultado final
+
+Código verificado: `876365b506c43b4c167544d26d0d382c7a6b74d3`.
+
+- [Compilación y regresión final 38931722511](https://github.com/juangarce34-blip/Viajaf-cil-/actions/runs/38931722511): correcta. 26 pruebas de datos, 12 grupos de navegador y cero errores JavaScript. APK debug interno y AAB generados; firma debug verificada, sin entrega de APK por ausencia de secretos de firma fija.
+- [Emulador Android 38931722617](https://github.com/juangarce34-blip/Viajaf-cil-/actions/runs/38931722617): correcto en el mismo commit, con las dos pruebas nativas existentes de arranque/persistencia y cancelación de copia grande.
+- Lint: 0 errores, 14 advertencias existentes. Auditoría de dependencias de ejecución: 0 vulnerabilidades.
+- Diagnóstico real: Shanghái, Ushuaia y Queenstown resueltas con HTTP 200. El proveedor de locales devolvió HTTP 500; no se declara reparado. La regresión de locales utiliza respuestas simuladas, y la selección oficial guardada de Los Ángeles sigue disponible.
+- Capturas revisadas a 390 px: cabecera 0.20, planificación sin menciones fijas a Londres, ficha del país y notas secundarias. Informes y capturas en el artefacto `ViajaFacil-Android-informes` (ID `12059711294`), con caducidad de 30 días.
+- Verificación local adicional de sintaxis y las 26 pruebas de datos; compilación y navegador ejecutados en CI porque el proxy local no era accesible y faltaba esbuild local.
+
+Siguiente paso de entrega: el propietario configura la clave privada persistente en los secretos descritos en `ANDROID.md`; después se genera el APK firmado y se valida la actualización conservando viajes en un móvil físico. No compartir claves por chat ni subirlas a Git. No hay publicación automática ni un nuevo APK instalable adjunto a esta entrega.
