@@ -22,6 +22,6 @@ La información gastronómica mundial sigue dependiendo de un servicio externo c
 
 ## Verificación
 
-26 pruebas unitarias locales correctas. Sintaxis de los nuevos módulos correcta. Regresión de navegador ampliada para avance, recarga, aislamiento, copias, inicio vacío, anchuras móviles y destino automático; su resultado y la compilación firmada se verificarán en GitHub Actions. El entorno local no ha podido descargar dependencias: conexión al proxy rechazada. No se considera equivalente a haber pasado navegador/Android.
+26 pruebas unitarias locales correctas. Sintaxis de los nuevos módulos correcta. 14 grupos de regresión de navegador correctos en GitHub Actions, incluidos avance, recarga, aislamiento, copias, inicio vacío, anchuras móviles y destino automático. Emulador Android sin conexión correcto. Compilación y firma de la primera integración correctas; la entrega incorpora también la corrección de caché PWA y su nueva compilación. El entorno local no ha podido descargar dependencias: conexión al proxy rechazada. No se considera equivalente a haber pasado navegador/Android.
 
 Versión Android 0.22.0, código 6; conserva identificador y firma persistente. `main` y la publicación quedan fuera del alcance.
