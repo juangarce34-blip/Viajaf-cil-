@@ -55,6 +55,6 @@ test('sintaxis de todos los scripts web y manifiesto', () => {
     if (match[1].trim()) { new vm.Script(match[1]); count++; }
   }
   assert.equal(count, 4);
-  for (const path of ['geo-planner.js', 'dining-core.js', 'dining.js', 'sw.js', 'backup.js']) new vm.Script(fs.readFileSync(path, 'utf8'));
+  for (const path of ['journey.js', 'geo-planner.js', 'dining-core.js', 'dining.js', 'sw.js', 'backup.js']) new vm.Script(fs.readFileSync(path, 'utf8'));
   assert.equal(JSON.parse(fs.readFileSync('manifest.webmanifest', 'utf8')).display, 'standalone');
 });

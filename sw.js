@@ -1,7 +1,7 @@
 // ViajaFácil RC16: cache isolated to this app, network-first for pages.
-const CACHE='viajafacil-rc21-v1';
+const CACHE='viajafacil-rc22-v1';
 const PREFIX='viajafacil-';
-const ASSETS=['./index.html','./geo-planner.js','./destination-core.js','./destinations.js','./official-country-data.js','./official-core.js','./trip-experience.js','./dining-core.js','./dining.js','./backup.js','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
+const ASSETS=['./index.html','./journey.js','./journey.css','./geo-planner.js','./destination-core.js','./destinations.js','./official-country-data.js','./official-core.js','./trip-experience.js','./dining-core.js','./dining.js','./backup.js','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(ASSETS)).then(() => self.skipWaiting()));
 });
@@ -20,10 +20,10 @@ self.addEventListener('fetch', event => {
     event.respondWith(fetch(req).then(response => {
       if(response.ok){
         const copy=response.clone();
-        caches.open(CACHE).then(cache => cache.put(new URL('./index.html',scope).href,copy)).catch(()=>{});
+        caches.open(CACHE).then(cache => cache.put(new URL('./index.html','./journey.js','./journey.css',scope).href,copy)).catch(()=>{});
       }
       return response;
-    }).catch(async () => (await caches.match(new URL('./index.html',scope).href)) || Response.error()));
+    }).catch(async () => (await caches.match(new URL('./index.html','./journey.js','./journey.css',scope).href)) || Response.error()));
     return;
   }
   if(!ASSETS.some(asset => new URL(asset,scope).pathname===url.pathname)) return;

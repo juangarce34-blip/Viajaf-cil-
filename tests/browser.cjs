@@ -13,7 +13,7 @@ const path = require('node:path');
     if (!target.startsWith(root + path.sep)) { res.writeHead(403).end(); return; }
     try {
       const data = await fs.readFile(target);
-      res.setHeader('Content-Type', ({ '.html':'text/html', '.js':'text/javascript', '.png':'image/png', '.webmanifest':'application/manifest+json' })[path.extname(target)] || 'application/octet-stream');
+      res.setHeader('Content-Type', ({ '.css':'text/css', '.html':'text/html', '.js':'text/javascript', '.png':'image/png', '.webmanifest':'application/manifest+json' })[path.extname(target)] || 'application/octet-stream');
       res.end(data);
     } catch { res.writeHead(404).end(); }
   });
@@ -30,6 +30,8 @@ const path = require('node:path');
     await page.goto(`http://127.0.0.1:${server.address().port}`, { waitUntil: 'domcontentloaded' });
     await page.waitForSelector('#geoPlanner', { state: 'attached' });
     assert.equal(await page.locator('section.active').getAttribute('id'), 'home');
+    assert.equal(await page.locator('#tripDestination').inputValue(),'');
+    assert.equal(await page.locator('#tripCountry').inputValue(),'');
     results.push('Arranque y creación de todas las secciones sin errores JavaScript');
 
     await page.evaluate(() => show('budget'));
@@ -115,7 +117,7 @@ const path = require('node:path');
     await page.waitForSelector('#geoAccept', { state: 'visible' });
     await page.waitForFunction(() => document.getElementById('geoPreview').textContent.includes('Plaza de prueba'));
     assert.match(await page.locator('#geoPreview').textContent(), /Plaza de prueba/);
-    assert.equal(await page.evaluate(() => document.getElementById('tripDestination').value), 'Londres');
+    assert.equal(await page.evaluate(() => document.getElementById('tripDestination').value), '');
     page.once('dialog', d => d.accept()); await page.click('#geoAccept');
     assert.match(await page.locator('#dpList').textContent(), /Plaza de prueba/);
     assert.equal(await page.evaluate(() => document.getElementById('tripDestination').value), 'Madrid');
@@ -276,6 +278,46 @@ const path = require('node:path');
     assert.equal(await page.locator('#worldNotesPanel').getAttribute('open'),'');
     assert.equal(await page.locator('#worldNotes').inputValue(),'Mi nota personal de Roma');
     results.push('Detalle moderno a 320/390/560 px sin desbordamiento, botones táctiles, teclado, funciones conservadas y origen opcional sin ciudad inventada');
+    await page.evaluate(() => show('home'));
+    await page.getByRole('button',{name:'Continuar mi viaje',exact:true}).click();
+    assert.equal(await page.locator('section.active').getAttribute('id'),'journeyStep');
+    await page.evaluate(()=>ViajaJourney.open('flights'));
+    await page.fill('#journey-booking','JFK · vuelo confirmado · 18:30');
+    await page.getByRole('button',{name:'Guardar avance',exact:true}).click();
+    assert.match(await page.locator('#journeyStatus').textContent(),/guardado/);
+    await page.reload({waitUntil:'domcontentloaded'});
+    await page.evaluate(()=>ViajaJourney.open('flights'));
+    assert.equal(await page.locator('#journey-booking').inputValue(),'JFK · vuelo confirmado · 18:30');
+    await page.getByRole('button',{name:'Marcar resuelto y continuar',exact:true}).click();
+    assert.equal(await page.locator('section.active').getAttribute('id'),'home');
+    assert.match(await page.locator('#journeyOverview').textContent(),/1 de 7 etapas/);
+    const journeyActive=await page.evaluate(()=>localStorage.getItem('vf8-active'));
+    page.once('dialog',d=>d.accept('Viaje guiado separado'));
+    await Promise.all([page.waitForNavigation({waitUntil:'domcontentloaded'}),page.evaluate(()=>rc8NewTrip())]);
+    assert.equal(await page.locator('#tripDestination').inputValue(),'');
+    assert.match(await page.locator('#journeyOverview').textContent(),/0 de 7 etapas/);
+    await page.evaluate(()=>ViajaJourney.open('destination'));
+    await page.getByRole('button',{name:'Marcar resuelto y continuar',exact:true}).click();
+    assert.match(await page.locator('#journeyStatus').textContent(),/Completa destino/);
+    await Promise.all([page.waitForNavigation({waitUntil:'domcontentloaded'}),page.evaluate(id=>vf8Switch(id),journeyActive)]);
+    assert.match(await page.locator('#journeyOverview').textContent(),/1 de 7 etapas/);
+    const guidedBackup=await page.evaluate(()=>ViajaBackup.validate(JSON.parse(ViajaBackup.serialize(vf9All()))));
+    assert.match(guidedBackup.data['vf-journey-v1'],/JFK/);
+    for(const width of [320,390,560]){
+      await page.setViewportSize({width,height:844});
+      assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),true);
+      await page.screenshot({path:'artifacts/asistente-'+width+'.png',fullPage:true});
+    }
+    await page.setViewportSize({width:390,height:844});
+    await page.evaluate(()=>{document.getElementById('tripDestination').value='Nueva York';document.getElementById('tripCountry').value='Estados Unidos';saveWorldDestination();show('geoPlanner')});
+    await page.route('https://viajafacil-conexion.fairflute64.chatgpt.site/api/geo**',route=>{
+      const city=new URL(route.request().url()).searchParams.get('mode')==='city';
+      return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(city?{results:[{city:'Nueva York',country:'Estados Unidos',formatted:'Nueva York, Estados Unidos',lat:40.71,lon:-74}]}:{features:[{properties:{name:'Visita automática',lat:40.72,lon:-74,place_id:'ny-test'}}]})});
+    });
+    await page.click('#geoGenerate');
+    await page.waitForFunction(()=>document.getElementById('geoPreview').textContent.includes('Visita automática'));
+    assert.equal(await page.locator('#geoCities button').count(),0);
+    results.push('Asistente: avance y resolución independientes, persistencia, aislamiento, copia v1, inicio vacío, 320/390/560 px y propuestas sin repetir ciudad');
     await page.evaluate(() => show('home'));
     await page.screenshot({ path: 'artifacts/inicio-390.png', fullPage: true });
     assert.deepEqual(errors, []);
