@@ -55,3 +55,16 @@ $vfKeystorePath = 'C:\ruta\ViajaFacil.jks'
 ```
 
 El lector admite saltos de línea, comillas de copia, envoltura certutil y ausencia de padding; después exige igualmente almacén válido, clave privada y certificado fijado. Nunca genera ni sustituye la clave para conseguir que pase una comprobación. Si un secreto es incorrecto, la ejecución falla sin entregar APK/AAB.
+
+## Estado de la comprobación real
+
+Código de la solución: `3fce5fdfe73efed3ffd145e8c8278917e4b63296`.
+
+- [Primera ejecución 38967078809](https://github.com/juangarce34-blip/Viajaf-cil-/actions/runs/38967078809): el push de la rama sí inició el workflow. Los cinco secretos no estaban vacíos, pero el almacén no se pudo decodificar como base64.
+- [Segunda ejecución 38967464543](https://github.com/juangarce34-blip/Viajaf-cil-/actions/runs/38967464543): mismo rechazo, incluso admitiendo los formatos de copia habituales. Se detuvo en el paso Validar los cinco secretos de firma, antes de las dependencias y de la compilación.
+- Esto prueba la disponibilidad de los cinco nombres, no la validez de las dos contraseñas, alias o huella de los secretos reales: esas comprobaciones dependen de poder abrir el almacén.
+- Pruebas locales con claves desechables: configuración válida; base64 multilinea/certutil/comillas/padding; rechazo de credenciales incorrectas, otra huella, PR/main, AAB sin firma, AAB con entradas añadidas o contenido manipulado. Todas correctas. Las 26 pruebas de datos existentes también pasan.
+- No se han generado APK/AAB firmados reales en estas ejecuciones. No se declara completada la firma. Falta sustituir VF_SIGNING_KEYSTORE_BASE64 por los bytes del archivo privado original codificados correctamente y reejecutar el job fallido.
+- Main verificada sin cambios: `b4c713c4d52c829e6d9fef5029eef03e8e8e3896`. No se modificó su rama ni se publicó ningún producto.
+
+Una vez corregido el secreto, usar Re-run jobs en la segunda ejecución, o reejecutar únicamente su job fallido. Se conserva el código de la solución y se vuelve a validar el almacén antes de compilar. El certificado fijado impide aceptar una clave distinta por accidente.
