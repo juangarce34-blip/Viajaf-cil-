@@ -13,6 +13,10 @@ const card=[...$('world').querySelectorAll('.card')].find(c=>c.querySelector('h2
 card.id='worldRequirements';
 function link(label,url){const a=node('a',label+' ↗');a.href=url;a.target='_blank';a.rel='noopener noreferrer';return a}
 function render(){
+  const passport=ViajaDestinationsCore.country($('passportCountry').value);
+  if(passport&&passport.code!=='ES'&&$('nationality').value==='es'){
+    $('nationality').value='other';localStorage.setItem('vf-profile-nationality','other');refreshProfile();vf8SaveActive();
+  }
   const c=context(),info=ViajaOfficial.guide(c);
   $('destinationHelp').textContent=c.destination?'Tu destino: '+[c.destination,c.country].filter(Boolean).join(', ')+'. Completa las fechas y consulta su documentación antes de viajar.':'Elige una ciudad o destino y su país para preparar tu guía.';
   $('ukResidence').hidden=!(ViajaDestinationsCore.normalize(c.destination)==='londres'||ViajaDestinationsCore.normalize(c.destination)==='london')||ViajaDestinationsCore.country(c.country)?.code!=='GB';
