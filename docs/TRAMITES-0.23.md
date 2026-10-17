@@ -40,3 +40,17 @@ La fecha es una revisión de contenido y fuentes, no una comprobación en tiempo
 Ampliar los formularios específicos al resto de países, permisos de regiones/actividades y todos los documentos del itinerario, preguntas de elegibilidad y seguimiento por viajero, renovación de pasaportes no españoles y actualización continuada del catálogo. La salud no se determina solo por nacionalidad/destino. Transporte, telefonía, divisas y nueva identidad visual mantienen su trabajo pendiente anterior; no se consideran terminados por esta entrega.
 
 Primera regresión de navegador: fallo del escenario nuevo tras recargar porque configuraba el perfil mediante asignaciones DOM que no disparaban los eventos de persistencia. Se cambia a rellenar el formulario real y comprobar explícitamente que su contexto persiste; no se elimina la aserción del estado ni se ignora el fallo.
+
+## Resultado final
+
+- Código entregado: `78d350c22d7788544bf18b22393cb3433cfe9c2d`.
+- Compilación firmada Actions 39013201067: éxito.
+- 33 pruebas unitarias correctas; 15 grupos de navegador correctos, cero errores JavaScript.
+- Emulador 39012991498: éxito con el mismo código de aplicación (el commit posterior solo corrige la preparación del escenario de navegador y la documentación).
+- Cero vulnerabilidades conocidas en dependencias de ejecución.
+- SHA256 APK: `19f517774186aee04f5135d87804f79f89657d722901af91614fe4b8e6ab582c`.
+- SHA256 AAB: `4bdcab1b163111b5e0f23f995a1a54010dfcd8fed59058708aa8f81f87444b1a`.
+- Certificado persistente SHA256: `1119e73a9d7343c1879a612c918fed5a349d47dc8d41fdb491704d83aa27c55f`.
+- Descarga independiente: hashes de CI correctos, certificado APK leído con keytool y AAB verificado en 436 entradas. Los cinco secretos se validaron en CI; no se descargó la clave privada.
+- Captura real `tramite-ESTA-390.png` revisada. Diseño comprobado sin desbordamiento a 320/390/560 px.
+- `main` conserva `b4c713c4d52c829e6d9fef5029eef03e8e8e3896`. Sin publicación.
