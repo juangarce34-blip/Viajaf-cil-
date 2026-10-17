@@ -44,6 +44,9 @@ jobs:
             adb shell svc wifi disable
             adb shell svc data disable
             cd android && bash gradlew --no-daemon :app:connectedDebugAndroidTest
+      - name: Detalle de las pruebas
+        if: always()
+        run: find android/app/build/outputs/androidTest-results -name "*.xml" -exec cat {} \;
       - uses: actions/upload-artifact@v4
         if: always()
         with:

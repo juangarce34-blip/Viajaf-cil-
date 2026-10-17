@@ -419,6 +419,7 @@ const path = require('node:path');
     assert.match(await page.locator('#moneyRateStatus').textContent(),/GBP/);
     await page.locator('#moneyOperator').selectOption('o2');
     await page.locator('#moneyBank').selectOption('revolut');
+    await page.getByText('Comparar mi tarifa con SIM/eSIM',{exact:true}).click();
     await page.locator('#moneyRoaming').fill('15');await page.locator('#moneySim').fill('5');
     assert.match(await page.locator('#travelMoney').textContent(),/10.00 € menos/);
     await page.waitForFunction(()=>document.getElementById('moneyRateStatus').textContent.includes('1 EUR'));

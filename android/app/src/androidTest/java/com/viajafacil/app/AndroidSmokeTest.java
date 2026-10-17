@@ -71,7 +71,7 @@ public class AndroidSmokeTest {
                 "show('personal'); document.querySelector('#travelMoney.active')!==null && document.getElementById('moneyOperator').value==='o2'"));
             for (int attempt=0; attempt<200; attempt++) {
                 if ("true".equals(javascript(activity,"document.getElementById('moneyRateStatus').textContent.includes('desactualizado')"))) {
-                    assertEquals("true",javascript(activity,"document.getElementById('moneyConverted').textContent.includes('86 GBP')")); return;
+                    assertEquals(javascript(activity,"document.getElementById('moneyConverted').textContent + ' | ' + document.getElementById('moneyRateStatus').textContent + ' | ' + document.getElementById('moneyDirection').value"),"true",javascript(activity,"document.getElementById('moneyConverted').textContent.includes('86 GBP')")); return;
                 }
                 Thread.sleep(100);
             }
