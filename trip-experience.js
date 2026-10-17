@@ -19,7 +19,7 @@ function render(){
   }
   const c=context(),info=ViajaOfficial.guide(c);
   $('destinationHelp').textContent=c.destination?'Tu destino: '+[c.destination,c.country].filter(Boolean).join(', ')+'. Completa las fechas y consulta su documentación antes de viajar.':'Elige una ciudad o destino y su país para preparar tu guía.';
-  $('ukResidence').hidden=!(ViajaDestinationsCore.normalize(c.destination)==='londres'||ViajaDestinationsCore.normalize(c.destination)==='london')||ViajaDestinationsCore.country(c.country)?.code!=='GB';
+  $('ukResidence').hidden=ViajaDestinationsCore.country(c.country)?.code!=='GB';
   card.replaceChildren(node('h2','Documentación y salud · '+(info.country?.name||c.country||'elige un país')));
   card.append(node('p',info.profile));
   const dates=node('p',c.depart&&c.returnDate?'Viaje: '+c.depart+' → '+c.returnDate:'Completa las fechas del viaje para comprobar la vigencia de las condiciones.');card.append(dates);
@@ -30,6 +30,7 @@ function render(){
   if(info.advice){const p=node('p');p.append(link('Ficha oficial de '+info.country.name+': documentación, sanidad y avisos',info.advice.url));card.append(p)}
   if(info.children)card.append(node('h3','Viaje con menores'),node('p',info.children));
   card.append(node('h3','Escalas'),node('p',info.transit));
+  const procedures=node('div');procedures.id='worldProcedures';card.append(procedures);if(window.ViajaProceduresUI)ViajaProceduresUI.mount(procedures);
   const date=node('p','Directorio de fuentes revisado el 16/10/2026. Los requisitos aplicables a tu perfil y fechas están pendientes de comprobar en la fuente oficial.');date.className='muted';card.append(date);
 }
 for(const id of ['tripDestination','tripCountry','nationality','tripDepart','tripReturn','purpose','visitChildren'])$(id).addEventListener('change',render);

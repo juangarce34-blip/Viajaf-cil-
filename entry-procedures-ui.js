@@ -1,0 +1,35 @@
+/* Official answers and user-reported progress. Never submits applications. */
+(()=>{'use strict';
+const $=id=>document.getElementById(id),node=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n};
+const KEY='vf-entry-status-v1',PROFILE='vf-entry-profile-v1';let serial=0;
+const choices=[['pending','Pendiente'],['requested','Solicitado'],['received','Recibido'],['checked','Comprobado'],['notApplicable','No me corresponde · comprobado']];
+function read(key){try{const d=JSON.parse(localStorage.getItem(key)||'{}');return d&&typeof d==='object'&&!Array.isArray(d)?d:{}}catch{return {}}}
+function context(){const p=read(PROFILE);return {destination:$('tripDestination').value,country:$('tripCountry').value,nationality:$('nationality').value,passportCountry:$('passportCountry').value,purpose:$('purpose').value,depart:$('tripDepart').value,returnDate:$('tripReturn').value,transit:$('tripTransit').value,children:Number($('visitChildren').value)||0,ukstatus:$('ukstatus').value,entryMode:p.entryMode||'',passportExpiry:p.passportExpiry||''}}
+function link(label,url,primary=false){const a=node('a',label+' ↗');a.href=url;a.target='_blank';a.rel='noopener noreferrer';if(primary)a.className='btn';return a}
+function mount(target){
+ target.replaceChildren();target.classList.add('vf-procedures');const c=context(),info=ViajaEntry.guide(c),prefix='entry-'+(++serial)+'-';
+ target.append(node('h2','Qué necesitas y dónde tramitarlo'),node('p',info.summary),node('p','Pasaporte: '+(c.passportCountry||(c.nationality==='es'?'España':'sin indicar'))+' · '+(c.purpose==='tourism'?'Turismo o visita':'Otro motivo')));
+ const edit=node('button','Revisar pasaporte, motivo y escalas');edit.className='btn secondary';edit.onclick=()=>show('setup');target.append(edit);
+ const fields=node('details'),summary=node('summary','Afinar la respuesta · llegada y caducidad');fields.append(summary);
+ const mode=node('select');mode.id=prefix+'mode';for(const [value,label] of [['','Sin indicar'],['air','Avión'],['landSea','Tierra o mar']]){const opt=node('option',label);opt.value=value;mode.append(opt)}mode.value=c.entryMode;
+ const modeLabel=node('label','Cómo entras al destino');modeLabel.htmlFor=mode.id;
+ const expiry=node('input');expiry.type='date';expiry.id=prefix+'expiry';expiry.value=c.passportExpiry;const expiryLabel=node('label','Caducidad del pasaporte (opcional)');expiryLabel.htmlFor=expiry.id;
+ const profileStatus=node('p');profileStatus.setAttribute('role','status');const apply=node('button','Actualizar respuestas');apply.className='btn secondary';apply.onclick=()=>{try{localStorage.setItem(PROFILE,JSON.stringify({entryMode:mode.value,passportExpiry:expiry.value}));vf8SaveActive();mount(target)}catch{profileStatus.textContent='No se pudo guardar el perfil. Comprueba el espacio del dispositivo.'}};fields.append(modeLabel,mode,expiryLabel,expiry,apply,profileStatus);target.append(fields);
+ for(const alert of info.alerts){const p=node('p',alert);p.className='vf-entry-alert';target.append(p)}
+ const list=node('div');list.className='vf-entry-list';
+ function renderItem(item){const article=node('article');article.className='vf-entry-card';article.dataset.procedure=item.id;article.append(node('small',item.scope==='transit'?'ESCALA · '+item.kind:item.kind),node('h3',item.title),node('p',item.answer));
+ const details=node('details');details.append(node('summary','Qué preparar, plazos y coste'));for(const [label,text] of [['Qué preparar',item.prepare],['Cuándo hacerlo',item.when],['Coste',item.fee],['Vigencia',item.validity]])if(text)details.append(node('h4',label),node('p',text));article.append(details);
+ article.append(link(item.scope==='passport'?'Pedir cita oficial':'Abrir trámite oficial',item.url,true));if(item.check)article.append(link('Comprobar qué vía corresponde',item.check));if(item.source&&item.source!==item.url)article.append(link('Condiciones oficiales',item.source));
+ const label=node('label','Mi estado · '+item.title),select=node('select');select.id=prefix+item.id.replace(/:/g,'-');label.htmlFor=select.id;for(const [value,text] of choices){const option=node('option',text);option.value=value;select.append(option)}
+ const stored=read(KEY);select.value=choices.some(v=>v[0]===stored[info.key]?.[item.id])?stored[info.key][item.id]:'pending';
+ const status=node('p');status.setAttribute('role','status');select.onchange=()=>{const before=read(KEY),all={...before},old=select.dataset.previous||'pending';try{all[info.key]={...(all[info.key]||{}),[item.id]:select.value};const keys=Object.keys(all);while(keys.length>8)delete all[keys.shift()];localStorage.setItem(KEY,JSON.stringify(all));vf8SaveActive();select.dataset.previous=select.value;status.textContent='Estado guardado por ti; la app no ha solicitado ni verificado una concesión.'}catch{try{localStorage.setItem(KEY,JSON.stringify(before))}catch{}select.value=old;status.textContent='No se pudo guardar el estado.'}};select.dataset.previous=select.value;article.append(label,select,status,node('small','Fuente revisada: '+item.reviewed+' · comprueba cambios antes de tramitar.'));list.append(article)}
+ info.items.forEach(renderItem);target.append(list);
+ const advice=ViajaOfficial.guide(c).advice;if(advice)target.append(link('Requisitos y sanidad de '+info.country.name+' · Exteriores',advice.url));
+ for(const t of info.transit){const a=ViajaOfficial.guide({...c,country:t.country?.name||t.name}).advice;if(a&&t.country?.code!==info.country?.code)target.append(link('Ficha oficial de la escala en '+t.country.name,a.url))}
+ const health=node('div');health.className='vf-entry-card';health.append(node('h3','Vacunas y certificados sanitarios'),node('p','Las exigencias pueden depender del país de procedencia, escalas y zonas visitadas. No damos por necesaria ni descartamos una vacuna solo por el destino. Consulta «Sanidad» de su ficha y un centro de vacunación internacional.'),link('Consulta y cita de vacunación internacional en España','https://www.sanidad.gob.es/areas/sanidadExterior/laSaludTambienViaja/centrosVacunacionInternacional/sisaex-vac.htm',true));target.append(health);
+ if(c.children>0&&info.passport==='ES'){const minor=node('div');minor.className='vf-entry-card';minor.append(node('h3','Si viajan menores'),node('p','Cada menor necesita su documento. Para menores españoles que salen de España sin sus representantes legales, consulta el permiso y sus condiciones; no se exige automáticamente a toda familia.'),link('Permiso de viaje de menores · Policía Nacional','https://sede.policia.gob.es/portalCiudadano/_es/tramites_ciudadania_documentacionviajar.php',true));target.append(minor)}
+ target.append(node('p','Los estados son personales y no se trasladan a otro pasaporte, país, fechas, motivo o escalas. No guardes números de pasaporte ni tarjetas. Los formularios se completan en la web oficial.'));
+}
+window.ViajaProceduresUI={mount,context};
+const previousShow=window.show;window.show=function(id){previousShow(id);if(id==='journeyStep'&&$('journeyRequirements'))mount($('journeyRequirements'))};
+})();
