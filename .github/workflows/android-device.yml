@@ -1,8 +1,8 @@
 name: Android en emulador
 on:
   push:
-    branches: [codex/auditoria-android-2026-10-15]
-    paths: ['android/**', 'native/**', 'index.html', 'backup.js', 'geo-planner.js', 'dining*.js', 'destination*.js', 'official*.js', 'trip-experience.js', 'journey.*', 'transport*.js', 'entry-procedures*.js', 'package*.json', 'capacitor.config.json', '.github/workflows/android-device.yml']
+    branches: [codex/conectividad-divisas-0-25]
+    paths: ['android/**', 'native/**', 'index.html', 'backup.js', 'geo-planner.js', 'dining*.js', 'destination*.js', 'official*.js', 'trip-experience.js', 'journey.*', 'travel-money*.js', 'transport*.js', 'entry-procedures*.js', 'package*.json', 'capacitor.config.json', '.github/workflows/android-device.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -52,3 +52,4 @@ jobs:
           path: |
             android/app/build/reports/androidTests/
             android/app/build/outputs/androidTest-results/
+

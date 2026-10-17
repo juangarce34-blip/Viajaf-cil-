@@ -1,0 +1,10 @@
+import {writeFile,mkdir} from 'node:fs/promises';
+import {createRequire} from 'node:module';
+const require=createRequire(import.meta.url),M=require('../travel-money.js'),T=require('../transport-core.js'),E=require('../entry-procedures.js');
+const urls=[...Object.values(M.operators),...Object.values(M.banks)].map(x=>x[1]);
+for(const c of T.cities)if(['paris','berlin','lisbon'].includes(c.id))urls.push(c.url);
+for(const code of ['CDG','ORY','LIS','BER'])urls.push(T.airport(code).options[0].url);
+for(const code of ['SG','KR','VN','ID'])for(const i of E.guide({country:code}).items)urls.push(i.url);
+urls.push(M.ENDPOINT+'&symbols=GBP');
+const results=await Promise.all([...new Set(urls)].map(async url=>{try{const r=await fetch(url,{signal:AbortSignal.timeout(15000)});const body=(await r.text()).slice(0,1000000);return {url,status:r.status,final:r.url,title:body.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]?.trim(),sample:url.includes('frankfurter')?body:undefined}}catch(e){return {url,error:e.message}}}));
+await mkdir('artifacts',{recursive:true});await writeFile('artifacts/money-sources.json',JSON.stringify({checkedAt:new Date().toISOString(),notice:'HTTP availability does not certify contract conditions.',results},null,2));console.log(JSON.stringify(results));

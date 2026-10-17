@@ -39,8 +39,9 @@ test('cambios de vuelo, dirección, terminal, horario y elección dejan pendient
  assert.notEqual(api.contextKey(c),api.contextKey({...c,destination:'Los Ángeles'}));assert.equal(api.contextKey(c),api.contextKey({...c,country:'US'}));
 });
 test('fuentes HTTPS estáticas y teléfonos identificados, sin inventar tarifas en directo ni llamadas automáticas',()=>{
- assert.equal(api.airports.length,11);assert.equal(api.cities.length,7);
+ assert.equal(api.airports.length,15);assert.equal(api.cities.length,10);
  for(const a of api.airports){assert.match(a.code,/^[A-Z]{3}$/);for(const o of a.options){if(o.url)assert.equal(new URL(o.url).protocol,'https:');if(o.phone){assert.match(o.phone,/^\+\d{7,15}$/);assert.ok(o.phoneLabel)}}}
  const rome=api.airport('FCO').options.find(o=>o.type==='taxi');assert.equal(rome.phone,'+39060609');
  const privateRide=api.airport('JFK').options.find(o=>o.type==='private');assert.equal(privateRide.kind,'private');assert.match(privateRide.source,/jfkairport.com/);
 });
+

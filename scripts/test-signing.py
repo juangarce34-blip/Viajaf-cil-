@@ -29,7 +29,7 @@ with tempfile.TemporaryDirectory(prefix='vf-signing-tests-') as temp:
     directory = Path(temp)
     env = {k:v for k,v in os.environ.items() if k not in names}
     env.update(GITHUB_ACTIONS='true', GITHUB_REPOSITORY='juangarce34-blip/Viajaf-cil-',
-               GITHUB_REF='refs/heads/codex/auditoria-android-2026-10-15', GITHUB_EVENT_NAME='push',
+               GITHUB_REF='refs/heads/codex/conectividad-divisas-0-25', GITHUB_EVENT_NAME='push',
                FIXTURE_STORE_PASS='test-store-password', FIXTURE_KEY_PASS='test-private-password')
     store = directory / 'test.jks'
     run(['keytool', '-genkeypair', '-storetype', 'JKS', '-keystore', str(store), '-alias', 'fixture',
@@ -82,3 +82,4 @@ with tempfile.TemporaryDirectory(prefix='vf-signing-tests-') as temp:
             target.writestr(name, b'changed' if name == 'base/manifest/AndroidManifest.xml' else content)
     run(['java', verifier, str(tampered), fingerprint], env, success=False)
     print('PASS: manipulación de contenido firmado detectada')
+

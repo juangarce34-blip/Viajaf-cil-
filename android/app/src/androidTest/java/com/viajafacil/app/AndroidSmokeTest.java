@@ -59,6 +59,26 @@ public class AndroidSmokeTest {
         }
     }
 
+    @Test public void moneyOfflineAndPreferences() throws Exception {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            AtomicReference<MainActivity> reference = new AtomicReference<>();
+            scenario.onActivity(reference::set);
+            MainActivity activity = reference.get(); ready(activity);
+            assertEquals("true", javascript(activity,
+                "document.getElementById('tripDestination').value='Londres'; document.getElementById('tripCountry').value='Reino Unido'; " +
+                "localStorage.setItem('vf8-provider-preferences',JSON.stringify({operator:'o2',bank:'n26'})); " +
+                "localStorage.setItem('vf8-fx-GBP',JSON.stringify({currency:'GBP',rate:0.86,date:'2026-10-16',retrievedAt:'2026-10-17T12:00:00Z'})); " +
+                "show('personal'); document.querySelector('#travelMoney.active')!==null && document.getElementById('moneyOperator').value==='o2'"));
+            for (int attempt=0; attempt<200; attempt++) {
+                if ("true".equals(javascript(activity,"document.getElementById('moneyRateStatus').textContent.includes('desactualizado')"))) {
+                    assertEquals("true",javascript(activity,"document.getElementById('moneyConverted').textContent.includes('86 GBP')")); return;
+                }
+                Thread.sleep(100);
+            }
+            fail("No se recuperó el cambio sin conexión");
+        }
+    }
+
     @Test public void largeExportCanBeCancelledWithoutOversizedSavedState() throws Exception {
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
             AtomicReference<MainActivity> reference = new AtomicReference<>();
@@ -93,3 +113,4 @@ public class AndroidSmokeTest {
         }
     }
 }
+

@@ -3,6 +3,9 @@
 'use strict';
 const REVIEWED='2026-10-17';
 const cities=[
+{"id": "paris", "country": "FR", "name": "París", "aliases": ["París", "Paris"], "url": "https://www.iledefrance-mobilites.fr/", "label": "Île-de-France Mobilités · rutas, billetes y aplicación", "payment": "Consulta los títulos Navigo y la app oficial Île-de-France Mobilités. No presupongas que una tarjeta bancaria sirve directamente como billete en todos los accesos."},
+{"id": "lisbon", "country": "PT", "name": "Lisboa", "aliases": ["Lisboa", "Lisbon"], "url": "https://www.metrolisboa.pt/en/", "label": "Metro de Lisboa · líneas, títulos y pago", "payment": "Comprueba en Metro de Lisboa los títulos y condiciones del pago contactless. Para autobuses consulta Carris; para trenes consulta CP."},
+{"id": "berlin", "country": "DE", "name": "Berlín", "aliases": ["Berlín", "Berlin"], "url": "https://www.bvg.de/en", "label": "BVG · transporte, billetes y aplicaciones", "payment": "Elige las zonas que cubran todo tu recorrido y comprueba si debes validar el billete antes de viajar. Consulta compra y validación en la app oficial de BVG."},
  {id:'nyc',country:'US',name:'Nueva York',aliases:['Nueva York','New York','New York City','NYC'],url:'https://www.mta.info/maps',label:'MTA · mapas de metro y autobuses'},
  {id:'london',country:'GB',name:'Londres',aliases:['Londres','London'],url:'https://tfl.gov.uk/plan-a-journey/',label:'TfL · planificar transporte público'},
  {id:'la',country:'US',name:'Los Ángeles',aliases:['Los Ángeles','Los Angeles'],url:'https://www.metro.net/riding/trip-planner/',label:'LA Metro · rutas y transporte público'},
@@ -13,6 +16,10 @@ const cities=[
 ];
 const option=(type,title,text,url,extra={})=>({type,title,text,url,kind:'official',...extra});
 const airports=[
+{"code": "CDG", "name": "Paris Charles de Gaulle", "city": "paris", "country": "FR", "place": "Paris Charles de Gaulle Airport", "options": [{"type": "transit", "title": "Trenes, metro y autobuses del aeropuerto", "text": "Consulta RER B, autobuses y la conexión desde tu terminal. Revisa obras y último servicio antes de elegir.", "url": "https://www.parisaeroport.fr/en/passengers/access/paris-charles-de-gaulle/public-transport", "kind": "official"}]},
+{"code": "ORY", "name": "Paris Orly", "city": "paris", "country": "FR", "place": "Paris Orly Airport", "options": [{"type": "transit", "title": "Trenes, metro y autobuses del aeropuerto", "text": "Consulta metro y autobuses desde Orly; comprueba el título aeroportuario y su validez. No uses instrucciones de Charles de Gaulle.", "url": "https://www.parisaeroport.fr/en/passengers/access/paris-orly/public-transport", "kind": "official"}]},
+{"code": "LIS", "name": "Humberto Delgado", "city": "lisbon", "country": "PT", "place": "Humberto Delgado Airport", "options": [{"type": "transit", "title": "Trenes, metro y autobuses del aeropuerto", "text": "El aeropuerto publica las conexiones de metro y autobús. Elige según tu alojamiento y comprueba equipaje, horario y título.", "url": "https://www.lisbonairport.pt/en/lis/access-parking/getting-to-and-from-the-airport/public-transportation", "kind": "official"}]},
+{"code": "BER", "name": "Berlin Brandenburg", "city": "berlin", "country": "DE", "place": "Berlin Brandenburg Airport", "options": [{"type": "transit", "title": "Trenes, metro y autobuses del aeropuerto", "text": "Consulta trenes regionales, S-Bahn y autobuses, estación de la terminal y zonas del billete antes de comprar.", "url": "https://ber.berlin-airport.de/en/orientation/getting-here/public-transport.html", "kind": "official"}]},
  {code:'JFK',name:'John F. Kennedy',city:'nyc',country:'US',place:'John F. Kennedy International Airport, New York, USA',options:[
  option('transit','AirTrain + metro o LIRR','AirTrain conecta con Jamaica y Howard Beach. Desde allí puedes enlazar con tren o metro según el barrio del hotel; no es un tren directo a todos los alojamientos.','https://www.jfkairport.com/transportation/airtrain'),
  option('taxi','Taxi autorizado','Acude a las paradas señalizadas. Comprueba el punto de recogida, suplementos y tarifa aplicable a tu zona. El 311 es información/reclamaciones, no una central de reservas.','https://www.jfkairport.com/transportation/taxi-service'),
@@ -78,3 +85,4 @@ function guide(c,raw,direction='arrival'){
 }
 return {airports,cities,airport,city,clean,contextKey,routeKey,maps,guide,reviewed:REVIEWED};
 });
+

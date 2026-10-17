@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Never enable shell tracing here: secret values must not reach logs.
 if [[ ${GITHUB_ACTIONS:-} == true ]]; then
-  if [[ ${GITHUB_REPOSITORY:-} != juangarce34-blip/Viajaf-cil- || ${GITHUB_REF:-} != refs/heads/codex/auditoria-android-2026-10-15 || ! ${GITHUB_EVENT_NAME:-} =~ ^(push|workflow_dispatch)$ ]]; then
+  if [[ ${GITHUB_REPOSITORY:-} != juangarce34-blip/Viajaf-cil- || ${GITHUB_REF:-} != refs/heads/codex/conectividad-divisas-0-25 || ! ${GITHUB_EVENT_NAME:-} =~ ^(push|workflow_dispatch)$ ]]; then
     echo '::error::La firma solo está permitida desde la rama Android autorizada, mediante push o ejecución manual.'
     exit 1
   fi
@@ -116,3 +116,4 @@ Path('artifacts/distribucion/BUILD.json').write_text(json.dumps({
 PY
 (cd artifacts/distribucion && sha256sum *.apk *.aab > SHA256.txt)
 echo 'APK y AAB release firmados con el mismo certificado, verificados y preparados como artefactos. Sin publicación.'
+

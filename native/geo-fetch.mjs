@@ -3,6 +3,7 @@ const ENDPOINT = 'https://viajafacil-conexion.fairflute64.chatgpt.site/api/geo';
 // Only the existing public geo endpoint uses native HTTP. The PWA keeps browser fetch.
 export function createGeoFetch(nativeGet) { return createFetch(nativeGet, ENDPOINT); }
 export function createDiningFetch(nativeGet) { return createFetch(nativeGet, 'https://overpass.private.coffee/api/interpreter'); }
+export function createMoneyFetch(nativeGet) { return createFetch(nativeGet, 'https://api.frankfurter.dev/v1/latest'); }
 function createFetch(nativeGet, endpoint) {
   return async (input, { signal } = {}) => {
     const url = new URL(String(input));
@@ -30,3 +31,4 @@ function createFetch(nativeGet, endpoint) {
     } finally { signal?.removeEventListener('abort', abort); }
   };
 }
+

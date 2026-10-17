@@ -4,7 +4,7 @@ import { build } from 'esbuild';
 await rm('dist', { recursive: true, force: true });
 await mkdir('dist', { recursive: true });
 // Explicit list: repository files, credentials and development tools never enter the APK.
-for (const name of ['entry-procedures.js', 'entry-procedures-ui.js', 'transport-core.js', 'transport-ui.js', 'journey.js', 'journey.css', 'geo-planner.js', 'destination-core.js', 'destinations.js', 'official-country-data.js', 'official-core.js', 'trip-experience.js', 'dining-core.js', 'dining.js', 'backup.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png']) {
+for (const name of ['travel-money.js', 'travel-money-ui.js', 'entry-procedures.js', 'entry-procedures-ui.js', 'transport-core.js', 'transport-ui.js', 'journey.js', 'journey.css', 'geo-planner.js', 'destination-core.js', 'destinations.js', 'official-country-data.js', 'official-core.js', 'trip-experience.js', 'dining-core.js', 'dining.js', 'backup.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png']) {
   await copyFile(name, `dist/${name}`);
 }
 await build({ entryPoints: ['native/entry.js'], bundle: true, outfile: 'dist/native.js',
@@ -12,3 +12,4 @@ await build({ entryPoints: ['native/entry.js'], bundle: true, outfile: 'dist/nat
 const html = await readFile('index.html', 'utf8');
 await writeFile('dist/index.html', html.replace('</body>', '<script src="./native.js"></script></body>'));
 console.log('Web incluida en dist; sin servidor remoto de arranque ni service worker en Android.');
+

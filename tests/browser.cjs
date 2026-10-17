@@ -411,6 +411,33 @@ const path = require('node:path');
     for(const width of [320,390,560]){await page.setViewportSize({width,height:844});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),true)}
     await page.setViewportSize({width:390,height:844});
     results.push('Traslados: datos compartidos entre vuelo/hotel, JFK→hotel y hotel→EWR, mismo aeropuerto solo al confirmar, opción prevista sin reserva, recarga, copias, aislamiento, teléfono de Roma, aeropuerto manual, rutas diarias y anchuras móviles');
+
+    await page.route('https://api.frankfurter.dev/**',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({base:'EUR',date:'2026-10-16',rates:{GBP:.86,JPY:160}})}));
+    await page.evaluate(()=>{document.getElementById('tripDestination').value='Londres';document.getElementById('tripCountry').value='Reino Unido';saveWorldDestination();show('personal')});
+    assert.equal(await page.locator('section.active').getAttribute('id'),'travelMoney');
+    await page.waitForFunction(()=>document.getElementById('moneyRateStatus').textContent.includes('1 EUR'));
+    assert.match(await page.locator('#moneyRateStatus').textContent(),/GBP/);
+    await page.locator('#moneyOperator').selectOption('o2');
+    await page.locator('#moneyBank').selectOption('revolut');
+    await page.locator('#moneyRoaming').fill('15');await page.locator('#moneySim').fill('5');
+    assert.match(await page.locator('#travelMoney').textContent(),/10.00 € menos/);
+    await page.waitForFunction(()=>document.getElementById('moneyRateStatus').textContent.includes('1 EUR'));
+    await page.locator('#moneyAmount').fill('100');assert.match(await page.locator('#moneyConverted').textContent(),/86 GBP/);
+    await page.locator('#moneyDirection').selectOption('reverse');await page.locator('#moneyAmount').fill('86');assert.match(await page.locator('#moneyConverted').textContent(),/100 EUR/);
+    await page.unroute('https://api.frankfurter.dev/**');await page.route('https://api.frankfurter.dev/**',r=>r.abort());
+    await page.getByRole('button',{name:'Actualizar cambio',exact:true}).click();
+    await page.waitForFunction(()=>document.getElementById('moneyRateStatus').textContent.includes('desactualizado'));
+    for(const width of [320,390,560]){await page.setViewportSize({width,height:844});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true)}
+    await page.reload({waitUntil:'domcontentloaded'});await page.evaluate(()=>show('personal'));
+    assert.equal(await page.locator('#moneyOperator').inputValue(),'o2');assert.equal(await page.locator('#moneyBank').inputValue(),'revolut');assert.equal(await page.locator('#moneyRoaming').inputValue(),'15');
+    page.once('dialog',d=>d.accept('Viaje con preferencias'));
+    await Promise.all([page.waitForNavigation({waitUntil:'domcontentloaded'}),page.evaluate(()=>rc8NewTrip())]);
+    await page.evaluate(()=>{document.getElementById('tripCountry').value='Japón';saveWorldDestination();show('personal')});
+    assert.equal(await page.locator('#moneyOperator').inputValue(),'o2');assert.equal(await page.locator('#moneyBank').inputValue(),'revolut');assert.equal(await page.locator('#moneyRoaming').inputValue(),'');
+    await page.waitForFunction(()=>document.getElementById('moneyRateStatus').textContent.includes('No hay cambio'));
+    assert.doesNotMatch(await page.locator('#moneyRateStatus').textContent(),/GBP/);
+    assert.ok(await page.evaluate(()=>ViajaBackup.validate(JSON.parse(ViajaBackup.serialize(vf9All())))));
+    results.push('Telefonía y pagos: 10 operadores/9 bancos, GBP y conversión inversa, caché sin red, preferencias entre viajes, comparaciones aisladas, copia y tamaños móviles');
     assert.deepEqual(errors, []);
     await fs.writeFile('artifacts/browser-results.json', JSON.stringify({ passed: results, errors }, null, 2));
     console.log(results.join('\n'));
@@ -419,3 +446,4 @@ const path = require('node:path');
     throw error;
   } finally { if (browser) await browser.close(); server.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });
+
