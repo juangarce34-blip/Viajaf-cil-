@@ -38,3 +38,5 @@ La fecha es una revisión de contenido y fuentes, no una comprobación en tiempo
 ## Pendiente
 
 Ampliar los formularios específicos al resto de países, permisos de regiones/actividades y todos los documentos del itinerario, preguntas de elegibilidad y seguimiento por viajero, renovación de pasaportes no españoles y actualización continuada del catálogo. La salud no se determina solo por nacionalidad/destino. Transporte, telefonía, divisas y nueva identidad visual mantienen su trabajo pendiente anterior; no se consideran terminados por esta entrega.
+
+Primera regresión de navegador: fallo del escenario nuevo tras recargar porque configuraba el perfil mediante asignaciones DOM que no disparaban los eventos de persistencia. Se cambia a rellenar el formulario real y comprobar explícitamente que su contexto persiste; no se elimina la aserción del estado ni se ignora el fallo.
