@@ -30,3 +30,5 @@ test('nuevos catálogos respetan país y exponen autoridades',()=>{
 test('cliente nativo de divisas solo permite el endpoint aprobado',async()=>{
  const {createMoneyFetch}=await import('../native/geo-fetch.mjs');const f=createMoneyFetch(async()=>({status:200,data:{base:'EUR'}}));assert.equal((await f(M.ENDPOINT)).ok,true);await assert.rejects(()=>f('https://example.com/v1/latest'));await assert.rejects(()=>f('https://api.frankfurter.dev/other'));
 });
+
+test('información oficial por operador y ampliación de roaming regulado',()=>{assert.match(M.operatorAdvice({country:'GB'},'lowi')[0],/zona 1/);assert.match(M.operatorAdvice({country:'GB'},'orange')[0],/condiciones específicas/);assert.equal(M.operatorAdvice({country:'JP'},'lowi'),null);assert.match(M.guide({country:'MD'}).roaming,/zona regulada/);});

@@ -59,7 +59,7 @@ public class AndroidSmokeTest {
         }
     }
 
-    @Test public void moneyOfflineAndPreferences() throws Exception {
+    @Test public void moneyNetworkFailureAndPreferences() throws Exception {
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
             AtomicReference<MainActivity> reference = new AtomicReference<>();
             scenario.onActivity(reference::set);
@@ -68,14 +68,14 @@ public class AndroidSmokeTest {
                 "document.getElementById('tripDestination').value='Londres'; document.getElementById('tripCountry').value='Reino Unido'; " +
                 "localStorage.setItem('vf8-provider-preferences',JSON.stringify({operator:'o2',bank:'n26'})); " +
                 "localStorage.setItem('vf8-fx-GBP',JSON.stringify({currency:'GBP',rate:0.86,date:'2026-10-16',retrievedAt:'2026-10-17T12:00:00Z'})); " +
-                "show('personal'); document.querySelector('#travelMoney.active')!==null && document.getElementById('moneyOperator').value==='o2'"));
+                "window.vfMoneyFetch=async()=>{throw new TypeError('Fallo de red simulado')}; show('personal'); document.querySelector('#travelMoney.active')!==null && document.getElementById('moneyOperator').value==='o2'"));
             for (int attempt=0; attempt<200; attempt++) {
                 if ("true".equals(javascript(activity,"document.getElementById('moneyRateStatus').textContent.includes('desactualizado')"))) {
                     assertEquals(javascript(activity,"document.getElementById('moneyConverted').textContent + ' | ' + document.getElementById('moneyRateStatus').textContent + ' | ' + document.getElementById('moneyDirection').value"),"true",javascript(activity,"document.getElementById('moneyConverted').textContent.includes('86 GBP')")); return;
                 }
                 Thread.sleep(100);
             }
-            fail("No se recuperó el cambio sin conexión");
+            fail("No se recuperó el cambio: " + javascript(activity,"document.getElementById('moneyRateStatus').textContent"));
         }
     }
 
