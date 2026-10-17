@@ -4,6 +4,7 @@ Base: `d008f881cc5eb28ff931f8c7f0f98405b62ef366`, versión 0.24.0 de `codex/audi
 
 ## Implementación
 
+- Corregida la caché PWA: los scripts y estilos locales con modo no-cors también se sirven sin conexión; se mantiene la exclusión de recursos de otros orígenes.
 - Nueva sección Móvil, moneda y pagos, accesible desde Consultas y Preparativos, para todos los países reconocidos. Reutiliza destino y país guardados; infiere un conjunto limitado de ciudades inequívocas si falta país. Un país explícito tiene prioridad.
 - Diez operadores españoles y nueve bancos. Preferencias locales globales reutilizadas entre viajes; sin credenciales ni datos bancarios sensibles. Guía regulatoria y respuestas por operador para Reino Unido con fuentes oficiales consultadas el 17/10/2026. No se afirma conocer el contrato del usuario.
 - Comparación de coste extra de roaming y coste total SIM/eSIM con importes confirmados por el usuario, aislada por viaje y país. No contrata servicios ni recomienda afiliados.

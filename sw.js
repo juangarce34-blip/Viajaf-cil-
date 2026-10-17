@@ -12,7 +12,7 @@ self.addEventListener('activate', event => {
 });
 self.addEventListener('fetch', event => {
   const req=event.request;
-  if(req.method!=='GET' || req.mode==='no-cors') return;
+  if(req.method!=='GET') return;
   const url=new URL(req.url);
   const scope=new URL(self.registration.scope);
   if(url.origin!==scope.origin || !url.pathname.startsWith(scope.pathname)) return;
