@@ -31,7 +31,7 @@ test('cambiar el perfil invalida los estados; alias del mismo país mantienen su
  assert.equal(api.key(base),api.key({...base,country:'US'}));
 });
 test('catálogo usa HTTPS y autoridades revisadas, sin intermediarios ni URLs construidas desde texto libre',()=>{
- const allowed=new Set(['www.gov.uk','esta.cbp.dhs.gov','travel.state.gov','www.canada.ca','immi.homeaffairs.gov.au','nzeta.immigration.govt.nz','www.immigration.govt.nz','www.travellerdeclaration.govt.nz','www.indianvisaonline.gov.in','etakenya.go.ke','visa2egypt.gov.eg','tdac.immigration.go.th','www.digital.go.jp','www.citapreviadnie.es']);
+ const allowed=new Set(['www.gov.uk','esta.cbp.dhs.gov','travel.state.gov','ceac.state.gov','www.canada.ca','immi.homeaffairs.gov.au','nzeta.immigration.govt.nz','www.immigration.govt.nz','www.travellerdeclaration.govt.nz','www.indianvisaonline.gov.in','etakenya.go.ke','visa2egypt.gov.eg','tdac.immigration.go.th','www.digital.go.jp','www.citapreviadnie.es']);
  for(const country of ['GB','US','CA','AU','NZ','IN','KE','EG','TH','JP'])for(const item of api.guide({...base,country}).items)for(const key of ['url','check','source'])if(item[key]){const u=new URL(item[key]);assert.equal(u.protocol,'https:');assert.ok(allowed.has(u.hostname),u.hostname)}
  assert.equal(api.guide({...base,country:'<script>'}).country,null);
 });

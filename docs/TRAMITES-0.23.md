@@ -15,7 +15,7 @@ Estados: pendiente, solicitado, recibido, comprobado o no aplicable comprobado. 
 ## Fuentes consultadas el 17/10/2026
 
 - Reino Unido: https://www.gov.uk/eta/apply · https://www.gov.uk/check-uk-visa · https://www.gov.uk/standard-visitor/apply-standard-visitor-visa
-- Estados Unidos: https://esta.cbp.dhs.gov/ · https://travel.state.gov/content/travel/en/us-visas/tourism-visit/visa-waiver-program.html · https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/forms/ds-160-online-nonimmigrant-visa-application.html
+- Estados Unidos (DS-160 directo confirmado desde el enlace del Departamento de Estado): https://ceac.state.gov/genniv/ · https://esta.cbp.dhs.gov/ · https://travel.state.gov/content/travel/en/us-visas/tourism-visit/visa-waiver-program.html · https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/forms/ds-160-online-nonimmigrant-visa-application.html
 - Canadá: https://www.canada.ca/en/immigration-refugees-citizenship/services/visit-canada/eta/apply.html · https://www.canada.ca/en/immigration-refugees-citizenship/services/visit-canada/entry-requirements-country.html
 - Australia: https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/evisitor-651
 - Nueva Zelanda: https://www.immigration.govt.nz/visas/new-zealand-electronic-travel-authority-nzeta/ · https://nzeta.immigration.govt.nz/ · https://www.travellerdeclaration.govt.nz/completing-your-declaration/
