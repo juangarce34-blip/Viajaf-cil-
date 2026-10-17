@@ -48,3 +48,16 @@ Android 0.24.0, versionCode 8; mismo paquete y firma persistente. Trabajo exclus
 ## Pendientes siguientes
 
 Ampliar aeropuertos y redes, cobertura de taxi con teléfonos comprobados y operadores, accesibilidad detallada, precios por grupo y actualizaciones de incidencias. Continúan pendientes la ampliación del catálogo de permisos a todos los destinos, respuestas de telefonía/divisas/bancos por país y la identidad del icono. El proveedor gastronómico externo conserva su limitación anterior; esta entrega no la soluciona.
+
+## Resultado final verificado
+
+- Código entregado: `d008f881cc5eb28ff931f8c7f0f98405b62ef366`.
+- Actions 39015639867: éxito; APK y AAB release con los cinco secretos validados.
+- Emulador 39015639804: éxito, arranque sin conexión, persistencia y exportación grande cancelable.
+- 40 pruebas unitarias y 16 grupos de navegador correctos, cero errores JavaScript. Cero vulnerabilidades conocidas de dependencias de ejecución.
+- Captura `traslado-JFK-390.png` revisada; anchuras de 320/390/560 px sin desbordamiento.
+- APK SHA256: `7ddc6dc05a5986e397eeb58939df8d83ef5e5e54be394837c29a1eb73b810907`.
+- AAB SHA256: `4e1b41fc71b69d13c77708387fbaf02f14176a9cb70a5be17dd62eb6491df537`.
+- Certificado persistente SHA256: `1119e73a9d7343c1879a612c918fed5a349d47dc8d41fdb491704d83aa27c55f`.
+- Hashes de descarga correctos; certificado APK leído con keytool y AAB verificado de forma independiente en 438 entradas. No se descarga el almacén privado de firma.
+- `main` conserva `b4c713c4d52c829e6d9fef5029eef03e8e8e3896` y no se ha publicado nada.
