@@ -1,0 +1,80 @@
+/* Official airport/city guidance; no live routing API, fares or reservations. */
+(function(root,factory){if(typeof module==='object'&&module.exports)module.exports=factory(require('./destination-core.js'));else root.ViajaTransport=factory(root.ViajaDestinationsCore);})(typeof globalThis!=='undefined'?globalThis:this,function(core){
+'use strict';
+const REVIEWED='2026-10-17';
+const cities=[
+ {id:'nyc',country:'US',name:'Nueva York',aliases:['Nueva York','New York','New York City','NYC'],url:'https://www.mta.info/maps',label:'MTA · mapas de metro y autobuses'},
+ {id:'london',country:'GB',name:'Londres',aliases:['Londres','London'],url:'https://tfl.gov.uk/plan-a-journey/',label:'TfL · planificar transporte público'},
+ {id:'la',country:'US',name:'Los Ángeles',aliases:['Los Ángeles','Los Angeles'],url:'https://www.metro.net/riding/trip-planner/',label:'LA Metro · rutas y transporte público'},
+ {id:'rome',country:'IT',name:'Roma',aliases:['Roma','Rome'],url:'https://www.atac.roma.it/',label:'ATAC · rutas, líneas y estado del servicio'},
+ {id:'madrid',country:'ES',name:'Madrid',aliases:['Madrid'],url:'https://www.crtm.es/',label:'CRTM · transporte, mapas y tarifas de Madrid'},
+ {id:'barcelona',country:'ES',name:'Barcelona',aliases:['Barcelona'],url:'https://www.tmb.cat/es/home',label:'TMB · metro, autobuses y rutas de Barcelona'},
+ {id:'tokyo',country:'JP',name:'Tokio',aliases:['Tokio','Tokyo','東京'],url:'https://www.tokyometro.jp/en/subwaymap/index.html',label:'Tokyo Metro · mapa y líneas'}
+];
+const option=(type,title,text,url,extra={})=>({type,title,text,url,kind:'official',...extra});
+const airports=[
+ {code:'JFK',name:'John F. Kennedy',city:'nyc',country:'US',place:'John F. Kennedy International Airport, New York, USA',options:[
+ option('transit','AirTrain + metro o LIRR','AirTrain conecta con Jamaica y Howard Beach. Desde allí puedes enlazar con tren o metro según el barrio del hotel; no es un tren directo a todos los alojamientos.','https://www.jfkairport.com/transportation/airtrain'),
+ option('taxi','Taxi autorizado','Acude a las paradas señalizadas. Comprueba el punto de recogida, suplementos y tarifa aplicable a tu zona. El 311 es información/reclamaciones, no una central de reservas.','https://www.jfkairport.com/transportation/taxi-service'),
+ option('private','Airlink New York · traslado privado o compartido','Empresa incluida en el directorio de proveedores de JFK. Consulta si cubre tu dirección, equipaje, condiciones y presupuesto; no es transporte público ni está reservado desde esta app.','https://www.goairlinkshuttle.com/',{kind:'private',phone:'+12128129000',phoneLabel:'+1 212 812 9000',source:'https://www.jfkairport.com/transportation/van-shuttle-service'})]},
+ {code:'EWR',name:'Newark Liberty',city:'nyc',country:'US',place:'Newark Liberty International Airport, New Jersey, USA',options:[
+ option('transit','AirTrain y conexiones ferroviarias','Revisa el enlace con NJ Transit o Amtrak y las alternativas de autobús. Las obras y los cambios de terminal pueden alterar la conexión.','https://www.newarkairport.com/transportation'),
+ option('taxi','Taxi autorizado en Newark','Utiliza la parada oficial; revisa peajes, suplementos y tarifa según tu destino antes de salir.','https://www.newarkairport.com/transportation/taxi-service'),
+ option('private','Consultar traslados con conductor','El aeropuerto publica las alternativas de transporte y servicios privados. Confirma con el operador la recogida y el precio total.','https://www.newarkairport.com/transportation')]},
+ {code:'LGA',name:'LaGuardia',city:'nyc',country:'US',place:'LaGuardia Airport, New York, USA',options:[
+ option('transit','Autobús + metro o tren','LaGuardia conecta mediante autobús con la red de metro y tren. Revisa Q70 y otras líneas para tu terminal; no presupongas una estación de metro dentro del aeropuerto.','https://www.laguardiaairport.com/transportation/public-transport'),
+ option('taxi','Taxi autorizado','Las paradas están señalizadas junto a las terminales. Consulta la tarifa y los cargos de tu recorrido.','https://www.laguardiaairport.com/transportation'),
+ option('private','Furgoneta, shuttle o coche con conductor','Consulta los servicios y proveedores publicados por el aeropuerto y confirma recogida y condiciones.','https://www.laguardiaairport.com/transportation/van-shuttle-service')]},
+ {code:'LHR',name:'Heathrow',city:'london',country:'GB',place:'Heathrow Airport, London, UK',options:[
+ option('transit','Elizabeth line, Piccadilly o Heathrow Express','Compara las conexiones según la zona del hotel y la terminal. Un tren más rápido hasta una estación central no siempre reduce el trayecto completo.','https://www.heathrow.com/transport-and-directions/getting-to-central-london'),
+ option('taxi','Black cab y recogida oficial','Consulta las paradas de taxi de tu terminal y el coste estimado del recorrido.','https://www.heathrow.com/transport-and-directions/by-taxi-or-mini-cab'),
+ option('private','Minicab con reserva previa','La página del aeropuerto enlaza proveedores autorizados. Revisa precio total, espera, cancelación y recogida con el operador.','https://www.heathrow.com/transport-and-directions/by-taxi-or-mini-cab')]},
+ {code:'LGW',name:'Gatwick',city:'london',country:'GB',place:'Gatwick Airport, London, UK',options:[
+ option('transit','Trenes desde Gatwick','Gatwick Express, Southern y Thameslink ofrecen conexiones diferentes. Elige según tu hotel, terminal, hora y estado del servicio.','https://www.gatwickairport.com/transport-options/train.html'),
+ option('taxi','Taxi y traslados del aeropuerto','Consulta las condiciones y los puntos de recogida publicados por Gatwick.','https://www.gatwickairport.com/transport-options/taxi.html'),
+ option('private','Airport Cars Gatwick · operador privado','Operador de private hire enlazado por Gatwick. Solicita presupuesto y confirma pasajeros, equipaje y hora de recogida directamente.','https://www.airportcars-gatwick.com/',{kind:'private',source:'https://www.gatwickairport.com/transport-options/taxi.html'})]},
+ {code:'LAX',name:'Los Angeles International',city:'la',country:'US',place:'Los Angeles International Airport, Los Angeles, USA',options:[
+ option('transit','FlyAway y conexiones de transporte público','FlyAway enlaza con Union Station y Van Nuys. Consulta las alternativas de Metro y las lanzaderas del aeropuerto para tu terminal; el último tramo depende del hotel.','https://www.flylax.com/flyaway-bus'),
+ option('taxi','Taxi y zonas de recogida de LAX','Comprueba la zona de recogida vigente y las indicaciones de tu terminal en la página del aeropuerto; puede requerir una lanzadera.','https://www.flylax.com/lax-traffic-and-ground-transportation'),
+ option('private','Traslados y vehículos con conductor','El directorio del aeropuerto recoge shuttles y servicios privados. Confirma cobertura, recogida y presupuesto sin dar por hecha una reserva.','https://www.flylax.com/lax-traffic-and-ground-transportation')]},
+ {code:'FCO',name:'Fiumicino · Leonardo da Vinci',city:'rome',country:'IT',place:'Fiumicino Airport, Rome, Italy',options:[
+ option('transit','Leonardo express hasta Roma Termini','El tren enlaza Fiumicino con Termini. Desde allí consulta el último tramo al alojamiento. Referencia publicada por Trenitalia: 32 minutos en el tren y 14 € por billete ordinario; no incluye el traslado hasta la puerta del hotel ni acredita la tarifa de tu grupo.','https://www.trenitalia.com/es/conexiones/conexiones-con-los-aeropuertos/leonardo-express.html'),
+ option('taxi','Taxi y ChiamaTaxi de Roma','Consulta las condiciones municipales y las zonas de tarifa. El teléfono corresponde a ChiamaTaxi de Roma; confirma disponibilidad para la recogida que necesitas.','https://romamobilita.it/muoversi-a-roma/taxi/',{phone:'+39060609',phoneLabel:'+39 06 0609'}),
+ option('private','Consultar un traslado con el alojamiento','Si prefieres recogida con conductor, pide al hotel un operador identificado y presupuesto escrito con espera, equipaje y cancelación. No hay una empresa privada contrastada añadida para este aeropuerto.',null,{kind:'advice'})]},
+ {code:'CIA',name:'Ciampino',city:'rome',country:'IT',place:'Ciampino Airport, Rome, Italy',options:[
+ option('transit','Autobuses y conexiones desde Ciampino','Consulta en ADR las conexiones de autobús, paradas y horarios. No uses las instrucciones del Leonardo express: ese tren corresponde a Fiumicino.','https://www.adr.it/trasporti-cia'),
+ option('taxi','Taxi y ChiamaTaxi de Roma','Comprueba las condiciones municipales para Ciampino; el teléfono de ChiamaTaxi puede orientarte sobre una recogida.','https://romamobilita.it/muoversi-a-roma/taxi/',{phone:'+39060609',phoneLabel:'+39 06 0609'})]},
+ {code:'MAD',name:'Adolfo Suárez Madrid-Barajas',city:'madrid',country:'ES',place:'Adolfo Suárez Madrid-Barajas Airport, Madrid, Spain',options:[
+ option('transit','Autobuses del aeropuerto','Aena publica líneas y paradas según terminal. El Exprés Aeropuerto conecta con la ciudad; referencia publicada de 5 € por billete. Comprueba las paradas y el servicio de tu hora, incluidos los cambios nocturnos.','https://www.aena.es/es/adolfo-suarez-madrid-barajas/como-llegar/autobus.html'),
+ option('taxi','Taxi oficial de Madrid','Acude a la parada autorizada. Consulta si tu dirección entra en una tarifa fija o se calcula por taxímetro; no se aplica una misma tarifa a cualquier destino.','https://www.aena.es/es/adolfo-suarez-madrid-barajas/como-llegar/taxi.html')]},
+ {code:'BCN',name:'Josep Tarradellas Barcelona-El Prat',city:'barcelona',country:'ES',place:'Josep Tarradellas Barcelona-El Prat Airport, Barcelona, Spain',options:[
+ option('transit','Tren y autobuses según terminal','Consulta el acceso ferroviario y tu terminal; Aena publica también las líneas de autobús. No des por hecho que todas las terminales tienen el mismo acceso.','https://www.aena.es/es/josep-tarradellas-barcelona-el-prat/como-llegar/tren.html'),
+ option('bus','Autobuses de Barcelona-El Prat','Consulta las líneas, paradas, frecuencias y tarifas en la ficha oficial de Aena.','https://www.aena.es/es/josep-tarradellas-barcelona-el-prat/como-llegar/autobus.html'),
+ option('taxi','Taxi oficial negro y amarillo','Consulta las paradas por terminal y las tarifas publicadas; confirma suplementos antes del trayecto.','https://www.aena.es/es/josep-tarradellas-barcelona-el-prat/como-llegar/taxi.html'),
+ option('private','VTC · proveedores publicados por Aena','La ficha del aeropuerto recoge operadores y zonas de recogida. Son servicios privados; confirma el presupuesto con la empresa.','https://www.aena.es/es/josep-tarradellas-barcelona-el-prat/como-llegar/vtc.html')]},
+ {code:'NRT',name:'Narita',city:'tokyo',country:'JP',place:'Narita International Airport, Japan',options:[
+ option('transit','JR, Keisei y Narita Sky Access','Compara las líneas y estaciones según la zona del hotel. Revisa qué estación corresponde a tu terminal y los cambios hasta el alojamiento.','https://www.narita-airport.jp/en/access/train/'),
+ option('bus','Autobuses de Narita','El aeropuerto ofrece información de autobuses por terminal. Consulta disponibilidad y recorrido para tu dirección.','https://www.narita-airport.jp/en/access/'),
+ option('taxi','Taxi desde Narita','Consulta la sección Taxi del aeropuerto para recogida, condiciones y tarifas; confirma el recorrido hasta tu alojamiento.','https://www.narita-airport.jp/en/access/')]}
+];
+function city(c){const code=core.country(c.country)?.code;return cities.find(x=>x.country===code&&x.aliases.some(a=>core.normalize(a)===core.normalize(c.destination||'')))||null}
+function airport(value){return airports.find(a=>a.code===String(value||'').trim().toUpperCase())||null}
+function contextKey(c){return JSON.stringify([core.country(c.country)?.code||core.normalize(c.country||''),core.normalize(c.destination||'')])}
+function clean(raw){const d={};for(const key of ['arrivalAirport','departureAirport','homeAirport','hotelName','hotelAddress','arrivalTerminal','departureTerminal','arrivalAt','departureAt'])d[key]=String(raw?.[key]||'').trim().slice(0,key==='hotelAddress'?300:160);d.sameAirport=raw?.sameAirport===true;for(const key of ['arrivalChoice','returnChoice'])d[key]=['transit','bus','taxi','private'].includes(raw?.[key])?raw[key]:'';return d}
+function routeKey(c,data,direction){const d=clean(data);return JSON.stringify([contextKey(c),direction,direction==='return'?(d.sameAirport?d.arrivalAirport:d.departureAirport):d.arrivalAirport,d.hotelName,d.hotelAddress,direction==='return'?d.departureTerminal:d.arrivalTerminal,direction==='return'?d.departureAt:d.arrivalAt,c.depart||'',c.returnDate||'',direction==='return'?d.returnChoice:d.arrivalChoice,direction==='return'?d.homeAirport:'',direction==='return'?c.origin||'':''])}
+function maps(origin,destination,mode='transit'){if(!String(origin||'').trim()||!String(destination||'').trim())return null;const u=new URL('https://www.google.com/maps/dir/');u.searchParams.set('api','1');u.searchParams.set('origin',origin);u.searchParams.set('destination',destination);u.searchParams.set('travelmode',mode==='driving'?'driving':'transit');return u.href}
+function guide(c,raw,direction='arrival'){
+ const d=clean(raw),returning=direction==='return',value=returning?(d.sameAirport?d.arrivalAirport:d.departureAirport):d.arrivalAirport,a=airport(value),urban=city(c),alerts=[];
+ const country=core.country(c.country)?.code;const mismatch=Boolean(a&&country&&a.country!==country);
+ if(mismatch)alerts.push('El aeropuerto indicado está en otro país que el destino. Comprueba el vuelo y el país antes de usar estas propuestas.');
+ if(a&&urban&&a.city!==urban.id&&!mismatch)alerts.push('Este aeropuerto no pertenece a la zona del destino seleccionado. Comprueba si tu viaje incluye ese desplazamiento.');
+ if(!a&&value)alerts.push('Aeropuerto indicado manualmente: todavía no tenemos sus transportes oficiales contrastados. Revisa su nombre, ciudad y país en mapas.');
+ if(!value)alerts.push(returning?'Indica el aeropuerto de salida o confirma que vuelves por el mismo.':'Indica el aeropuerto de llegada que figura en tu vuelo; no elegimos uno por defecto.');
+ if(!d.hotelAddress)alerts.push('Añade la dirección del alojamiento para consultar el recorrido completo. El nombre de una ciudad no sustituye la dirección del hotel.');
+ const place=a?.place||value,hotel=[d.hotelName,d.hotelAddress,c.destination,c.country].filter(Boolean).join(', '),terminal=returning?d.departureTerminal:d.arrivalTerminal;
+ const from=returning?hotel:[place,terminal?'Terminal '+terminal:''].filter(Boolean).join(', '),to=returning?[place,terminal?'Terminal '+terminal:''].filter(Boolean).join(', '):hotel;
+ const ready=Boolean(value&&d.hotelAddress&&!mismatch);
+ return {airport:a,urban,alerts,options:mismatch?[]:a?.options||[],from,to,transit:ready?maps(from,to):null,driving:ready?maps(from,to,'driving'):null,reviewed:REVIEWED,key:routeKey(c,d,direction),localTime:returning?d.departureAt:d.arrivalAt,home:d.homeAirport&&c.origin?maps(airport(d.homeAirport)?.place||d.homeAirport,c.origin):null};
+}
+return {airports,cities,airport,city,clean,contextKey,routeKey,maps,guide,reviewed:REVIEWED};
+});
