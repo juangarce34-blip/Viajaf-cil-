@@ -460,7 +460,12 @@ const path = require('node:path');
     assert.match(await page.locator('#travelMoney').textContent(),/importes anteriores no están confirmados/);
     results.push('Regresiones 0.26: borrar preferencias heredadas, cambio de operador/fechas, importes antiguos pendientes y Edimburgo sin texto de Londres');
 
-    await page.evaluate(()=>{document.getElementById('tripDestination').value='Nueva York';document.getElementById('tripCountry').value='Estados Unidos';document.getElementById('tripDepart').value='2026-11-10';document.getElementById('tripReturn').value='2026-11-20';document.getElementById('nationality').value='es';document.getElementById('passportCountry').value='España';document.getElementById('purpose').value='tourism';document.getElementById('tripTransit').value='';saveProfile();saveWorldDestination();vf8SaveActive();ViajaJourney.open('prepare')});
+    await page.evaluate(()=>show('setup'));
+    await page.fill('#tripDestination','Nueva York');await page.fill('#tripCountry','Estados Unidos');
+    await page.fill('#passportCountry','España');await page.selectOption('#nationality','es');await page.selectOption('#purpose','tourism');
+    await page.fill('#tripDepart','2026-11-10');await page.fill('#tripReturn','2026-11-20');await page.fill('#tripTransit','');await page.locator('#tripTransit').press('Tab');
+    await page.evaluate(()=>{saveProfile();saveWorldDestination();vf8SaveActive();ViajaJourney.open('prepare')});
+    const prepContext=await page.evaluate(()=>ViajaEntry.key(ViajaProceduresUI.context()));
     const summary=page.locator('#prepareSummary');
     assert.match(await summary.textContent(),/Nueva York/);assert.match(await summary.textContent(),/USD/);
     const prepBefore=await summary.locator('[data-preparation=documents] p').textContent();
@@ -477,6 +482,7 @@ const path = require('node:path');
     for(const width of [320,390,560]){await page.setViewportSize({width,height:844});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true)}
     await page.setViewportSize({width:390,height:844});await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:'artifacts/preparativos-0.26-390.png',fullPage:true});
     await page.reload({waitUntil:'domcontentloaded'});await page.evaluate(()=>ViajaJourney.open('prepare'));
+    assert.equal(await page.evaluate(()=>ViajaEntry.key(ViajaProceduresUI.context())),prepContext);
     assert.equal(await page.locator('#journeyRequirements [data-procedure="destination:US:esta"] select').inputValue(),'received');
     await page.evaluate(()=>{document.getElementById('tripReturn').value='2026-11-21';ViajaJourney.open('prepare')});
     assert.equal(await page.locator('#journeyRequirements [data-procedure="destination:US:esta"] select').inputValue(),'pending');
