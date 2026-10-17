@@ -126,7 +126,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: ViajaFacil-Android-firma-fija
-          run-id: 39015639867
+          run-id: 39019120369
           github-token: ${{ github.token }}
           path: previous-release
       - name: Activar aceleración

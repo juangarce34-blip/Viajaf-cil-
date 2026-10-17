@@ -14,7 +14,7 @@ const cities={londres:'GB',london:'GB',paris:'FR',roma:'IT',rome:'IT',tokio:'JP'
 function destination(c){return core.country(c.country)||(!String(c.country||'').trim()?core.country(cities[core.normalize(c.destination||'')]):null)}
 function guide(c,operator,bank){const country=destination(c),code=country?.code,currency=currencies[code]||null;return {country,currency,operator:operators[operator]||null,bank:banks[bank]||null,
  roaming:!code?'Selecciona el país para determinar la zona de roaming.':code==='ES'?'En España, con una línea española utilizas tu tarifa nacional. Las llamadas a números extranjeros pueden tener otra tarifa.':eea.has(code)?'Para una línea española en viajes periódicos por la zona regulada (UE/EEE, Moldavia y Ucrania) se aplica el régimen de roaming como en casa, sujeto a uso razonable y condiciones de tu contrato. Puede haber límites de GB incluso con datos ilimitados; confirma tu bono y el recargo al agotarlo.':code==='GB'?'Reino Unido está fuera del régimen obligatorio de roaming de la UE. Tu operador puede incluirlo o cobrarlo según contrato, modalidad y promociones. No actives los datos hasta comprobar tu línea concreta.':'El destino está fuera de la zona UE/EEE. No presupongas datos ni llamadas incluidos. Comprueba zona, bono diario, activación automática y precio fuera del bono antes de conectarte.',
- payments:code==='GB'?'En Londres la tarjeta sin contacto es habitual y algunos establecimientos solo aceptan tarjeta. Conserva una alternativa por si falla tu tarjeta y consulta antes de depender del efectivo.':code==='JP'?'En Japón combina tarjeta y efectivo: pequeños comercios pueden exigir efectivo y algunos cajeros no admiten tarjetas extranjeras. Consulta la red admitida antes de retirar.':'La aceptación de tarjetas y la disponibilidad de cajeros varían por localidad, comercio y red. Lleva una alternativa de pago y una reserva moderada de efectivo; comprueba cajeros en la aplicación oficial de tu banco.'};}
+ payments:code==='JP'?'En Japón combina tarjeta y efectivo: pequeños comercios pueden exigir efectivo y algunos cajeros no admiten tarjetas extranjeras. Consulta la red admitida antes de retirar.':'La aceptación de tarjetas y la disponibilidad de cajeros varían por localidad, comercio y red. Lleva una alternativa de pago y una reserva moderada de efectivo; comprueba cajeros en la aplicación oficial de tu banco.'};}
 const ukNotes={
  movistar:['Movistar publica Reino Unido en zona 1. Consulta en Mi Movistar el límite de GB de tu línea; datos ilimitados en España no equivalen a datos ilimitados en roaming.',operators.movistar[1]],
  o2:['Las condiciones de O2 España de 2026 incluyen Reino Unido en zona 1. Comprueba uso razonable y datos disponibles de tu contrato antes de activar la itinerancia.','https://web.static.o2online.es/media/public/particulares_servicio_roaming_2026.pdf'],
@@ -45,5 +45,14 @@ async function exchange(currency,{fetcher=globalThis.fetch,storage=globalThis.lo
 }
 function convert(amount,rate,inverse=false){if(String(amount).trim()===''||!Number.isFinite(Number(amount))||Number(amount)<0||!Number.isFinite(rate)||rate<=0)return null;const result=inverse?Number(amount)/rate:Number(amount)*rate;return Number.isFinite(result)?result:null}
 function compare(a,b){const valid=x=>String(x).trim()!==''&&Number.isFinite(Number(x))&&Number(x)>=0;return valid(a)&&valid(b)?Math.round((Number(a)-Number(b))*100)/100:null}
-return {operators,banks,destination,guide,operatorAdvice,currencies,exchange,validateRate,cached,convert,compare,ENDPOINT};
+// A deliberate empty selection must never fall back to an old trip preference.
+function preference(prefs,key,legacy=''){
+ const value=prefs&&Object.prototype.hasOwnProperty.call(prefs,key)?prefs[key]:legacy;
+ const catalogue=key==='operator'?operators:banks;
+ return typeof value==='string'&&Object.prototype.hasOwnProperty.call(catalogue,value)?value:'';
+}
+// Never attribute an unscoped legacy quote to a provider or a different journey.
+function comparisonKey(c,operator){return JSON.stringify([destination(c)?.code||'',core.normalize(c.destination||''),operator||'',c.depart||'',c.returnDate||'',core.normalize(c.transit||'')])}
+function comparison(saved,c,operator){return saved?.version===2&&saved.context===comparisonKey(c,operator)?{roaming:saved.roaming??'',sim:saved.sim??''}:{roaming:'',sim:''}}
+return {operators,banks,destination,guide,operatorAdvice,currencies,exchange,validateRate,cached,convert,compare,preference,comparisonKey,comparison,ENDPOINT};
 });

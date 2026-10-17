@@ -1,5 +1,5 @@
 // ViajaFácil RC16: cache isolated to this app, network-first for pages.
-const CACHE='viajafacil-rc25-v1';
+const CACHE='viajafacil-rc26-v1';
 const PREFIX='viajafacil-';
 const ASSETS=['./index.html','./travel-money.js','./travel-money-ui.js','./entry-procedures.js','./entry-procedures-ui.js','./transport-core.js','./transport-ui.js','./journey.js','./journey.css','./geo-planner.js','./destination-core.js','./destinations.js','./official-country-data.js','./official-core.js','./trip-experience.js','./dining-core.js','./dining.js','./backup.js','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
 self.addEventListener('install', event => {

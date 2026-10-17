@@ -28,6 +28,23 @@ function render(){
  const list=n('ol');list.className='vf-stages';steps.forEach((s,i)=>{const li=n('li'),b=button('',()=>open(s[0]));const number=n('span',resolved(s,state)?'✓':String(i+1));number.className='vf-stage-number';const text=n('span');text.append(n('strong',s[1]),n('small',resolved(s,state)?'Resuelto · puedes revisarlo':'Pendiente'));b.append(number,text,n('span','›'));li.append(b);list.append(li)});overview.append(list);
 }
 function field(label,key,value,container,values){const l=n('label',label),input=n('textarea');input.rows=3;input.maxLength=2000;input.id='journey-'+key;l.htmlFor=input.id;input.value=value||'';input.oninput=()=>{values[key]=input.value};container.append(l,input)}
+function focusTarget(target){if(!target)return;target.tabIndex=-1;target.focus();target.scrollIntoView({block:'start'})}
+function preparations(){
+ const target=$('prepareSummary');if(!target)return;
+ const c=ViajaProceduresUI.context(),info=ViajaEntry.guide(c);
+ let all={},prefs={};try{all=JSON.parse(localStorage.getItem('vf-entry-status-v1')||'{}')||{};prefs=JSON.parse(localStorage.getItem('vf8-provider-preferences')||'{}')||{}}catch{}
+ const statuses=all[info.key]||{},finished=item=>['received','checked','notApplicable'].includes(statuses[item.id]),pending=info.items.filter(item=>!finished(item)),requested=pending.filter(item=>statuses[item.id]==='requested').length;
+ const op=ViajaMoney.preference(prefs,'operator',localStorage.getItem('vf-operator')),bank=ViajaMoney.preference(prefs,'bank',localStorage.getItem('vf-bank')),money=ViajaMoney.guide(c,op,bank);
+ target.replaceChildren(n('small','ANTES DE VIAJAR'),n('h2','Tus preparativos, de un vistazo'),n('p',(c.destination||'Destino pendiente')+' · '+(info.country?.name||'Indica el país')));
+ const list=n('div');list.className='vf-preparation-list';
+ function row(id,title,answer,action,fn){const card=n('article');card.dataset.preparation=id;card.append(n('h3',title),n('p',answer),button(action,fn));list.append(card)}
+ row('documents','Pasaporte y entrada',info.items.length?pending.length+' de '+info.items.length+' trámites del catálogo pendientes'+(requested?' · '+requested+' solicitado(s), a la espera de respuesta':'')+'. Estados indicados por ti.':'Requisitos por comprobar: no hay trámites concretos catalogados para este perfil.',pending.length?'Continuar con '+pending[0].title:'Revisar documentación',()=>{const articles=[...document.querySelectorAll('#journeyRequirements [data-procedure]')];focusTarget(articles.find(a=>a.dataset.procedure===pending[0]?.id)||$('journeyRequirements'))});
+ row('health','Salud y seguro','Consulta la sanidad del destino y las escalas; las vacunas dependen también de tu situación. Revisa asistencia médica, exclusiones y repatriación de tu cobertura.','Ver orientación sanitaria',()=>focusTarget(document.querySelector('#journeyRequirements .vf-health')));
+ row('mobile','Tu móvil en destino',money.roaming+(money.operator?' Operador elegido: '+money.operator[0]+'.':' Elige tu operador para abrir sus condiciones.'),'Revisar roaming',()=>ViajaMoneyUI.open('mobile'));
+ row('payments','Cómo pagar',money.currency?(money.currency==='EUR'?'La moneda del destino es el euro.':'Moneda del destino: '+money.currency+'. Puedes consultar su cambio de referencia.')+' '+(money.bank?'Banco elegido: '+money.bank[0]+'. Comprueba las comisiones de tu tarjeta concreta.':'Revisa tu tarjeta y las comisiones antes de viajar.'):'Moneda aún no disponible para este destino: compruébala antes de convertir.','Ver moneda y tarjetas',()=>ViajaMoneyUI.open('exchange'));
+ target.append(list,n('small','Este resumen muestra el catálogo disponible. Seleccionar un operador o banco no confirma sus condiciones; los estados de trámites no acreditan una autorización.'));
+}
+document.addEventListener('vf:procedures-change',preparations);
 function open(id){
  const step=steps.find(s=>s[0]===id);if(!step)return;
  const state=read(),saved={...(state[id]||{})};if(id==='prepare'&&saved.entryKey!==ViajaEntry.key(ViajaProceduresUI.context()))saved.done=false;if(['arrival','return'].includes(id)&&saved.transferKey!==ViajaTransferUI.routeKey(id))saved.done=false;const values={...saved};panel.replaceChildren(button('← Mi viaje',()=>show('home')),n('small','PASO '+(steps.indexOf(step)+1)+' DE '+steps.length),n('h1',step[1]),n('h2',step[2]),n('p',step[3]));
@@ -40,6 +57,7 @@ function open(id){
   if(id==='flights')panel.append(button('Comprobar documentación antes de reservar',()=>open('prepare')));
  }
  if(id==='prepare'){
+  const summary=n('div');summary.id='prepareSummary';summary.className='vf-prepare-summary';panel.append(summary);
   const requirements=n('div');requirements.id='journeyRequirements';panel.append(requirements);ViajaProceduresUI.mount(requirements);
   if(saved.checks){const previous=n('details');previous.append(n('summary','Tus notas anteriores'),n('p',saved.checks));panel.append(previous)}
   panel.append(button('Consultar operador, banco y comisiones',()=>show('personal')));
@@ -54,7 +72,7 @@ function open(id){
  panel.append(button('Guardar avance',()=>persist(Boolean(saved.done))),button(saved.done?'Dejar esta etapa pendiente':'Marcar resuelto y continuar',()=>{if(id==='destination'&&(!$('tripDestination').value.trim()||!$('tripCountry').value.trim()||!$('tripDepart').value||!$('tripReturn').value||$('tripReturn').value<$('tripDepart').value)){status.textContent='Completa destino, país y fechas válidas antes de resolver esta etapa.';return}if(!saved.done&&['arrival','return'].includes(id)&&!ViajaTransport.guide(ViajaTransferUI.context(),ViajaTransferUI.current(),id).transit){status.textContent='Completa y comprueba el aeropuerto y la dirección del alojamiento antes de resolver el traslado.';return}if(persist(!saved.done))show('home')},true),status,n('p','Resolver una etapa es tu confirmación personal. Puedes guardar el avance y completar lo pendiente más tarde.'));
  show('journeyStep');
 }
-const previous=window.show;window.show=function(id){if(id==='home')render();previous(id)};
+const previous=window.show;window.show=function(id){if(id==='home')render();previous(id);if(id==='journeyStep')preparations()};
 // Primary entry in trip detail; detailed tools remain available below.
 const observer=new MutationObserver(()=>{const target=$('v12detail');if(!target||target.querySelector('#journeyDetailEntry'))return;const b=button('Continuar mi viaje',()=>show('home'),true);b.id='journeyDetailEntry';target.prepend(b)});observer.observe($('v12detail'),{childList:true});
 window.ViajaJourney={open,render};render();

@@ -32,3 +32,20 @@ test('cliente nativo de divisas solo permite el endpoint aprobado',async()=>{
 });
 
 test('información oficial por operador y ampliación de roaming regulado',()=>{assert.match(M.operatorAdvice({country:'GB'},'lowi')[0],/zona 1/);assert.match(M.operatorAdvice({country:'GB'},'orange')[0],/condiciones específicas/);assert.equal(M.operatorAdvice({country:'JP'},'lowi'),null);assert.match(M.guide({country:'MD'}).roaming,/zona regulada/);});
+
+test('preferencia vacía prevalece sobre valores heredados; migración solo cuando falta',()=>{
+ assert.equal(M.preference({},'operator','movistar'),'movistar');
+ assert.equal(M.preference({operator:''},'operator','movistar'),'');
+ assert.equal(M.preference({bank:''},'bank','ing'),'');
+ assert.equal(M.preference({operator:'inventado'},'operator','movistar'),'');
+});
+test('comparación se invalida al cambiar operador, fechas, destino o escalas',()=>{
+ const c={destination:'Edimburgo',country:'GB',depart:'2026-11-01',returnDate:'2026-11-08',transit:''};
+ const saved={version:2,context:M.comparisonKey(c,'movistar'),roaming:'20',sim:'10'};
+ assert.deepEqual(M.comparison(saved,c,'movistar'),{roaming:'20',sim:'10'});
+ for(const [context,operator] of [[c,'orange'],[{...c,depart:'2026-11-02'},'movistar'],[{...c,returnDate:'2026-11-09'},'movistar'],[{...c,country:'JP'},'movistar'],[{...c,destination:'Manchester'},'movistar'],[{...c,transit:'Canadá'},'movistar']])assert.deepEqual(M.comparison(saved,context,operator),{roaming:'',sim:''});
+ assert.deepEqual(M.comparison({roaming:'20',sim:'10'},c,'movistar'),{roaming:'',sim:''});
+});
+test('pagos británicos no atribuyen Londres a otras ciudades',()=>{
+ for(const destination of ['Edimburgo','Manchester','Londres'])assert.doesNotMatch(M.guide({destination,country:'GB'}).payments,/Londres/);
+});
